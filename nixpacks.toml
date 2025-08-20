@@ -1,17 +1,18 @@
 [phases.setup]
-nixPkgs = ['python3', 'python3Packages.pip', 'postgresql']
+nixPkgs = ['python3Full', 'postgresql']
 
 [phases.install]
 cmds = [
-    'pip install --upgrade pip',
-    'pip install -r requirements.txt'
+    'python3 -m ensurepip --upgrade',
+    'python3 -m pip install --upgrade pip',
+    'python3 -m pip install -r requirements.txt'
 ]
 
 [phases.build]
 cmds = [
-    'python -c "import sys; print(f\"Python version: {sys.version}\")"',
-    'pip list'
+    'python3 -c "import sys; print(f\"Python version: {sys.version}\")"',
+    'python3 -m pip list'
 ]
 
 [start]
-cmd = 'python -m uvicorn src.backend.main:app --host 0.0.0.0 --port $PORT'
+cmd = 'python3 -m uvicorn src.backend.main:app --host 0.0.0.0 --port $PORT'
