@@ -15,5 +15,8 @@ cmds = [
 ]
 
 [start]
-# Use shell so $PORT is expanded by the runtime
-cmd = ["sh", "-c", "python3 -m uvicorn src.backend.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+cmd = [
+  "python3",
+  "-c",
+  "import os, uvicorn; port=int(os.getenv('PORT','8000')); uvicorn.run('src.backend.main:app', host='0.0.0.0', port=port)"
+]
