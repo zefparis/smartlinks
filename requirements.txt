@@ -65,3 +65,5 @@ opentelemetry-exporter-otlp-proto-grpc>=1.20.0
 
 # Payment processing
 redis==5.0.1
+
+# Force rebuild - updated nixpacks config
