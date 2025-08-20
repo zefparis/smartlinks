@@ -29,12 +29,17 @@ def main():
         # Import the app after setting up the path
         from soft.router import app
         
-        logger.info("Starting uvicorn server...")
+        # Read runtime settings
+        host = os.getenv("HOST", "0.0.0.0")
+        port = int(os.getenv("PORT", "8000"))
+        reload = os.getenv("DEBUG", "false").lower() == "true"
+
+        logger.info(f"Starting uvicorn server on {host}:{port} (reload={reload})...")
         uvicorn.run(
             "soft.router:app",
-            host="0.0.0.0",
-            port=8000,
-            reload=True,
+            host=host,
+            port=port,
+            reload=reload,
             log_level="info"
         )
     except Exception as e:

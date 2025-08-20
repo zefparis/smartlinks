@@ -15,8 +15,4 @@ cmds = [
 ]
 
 [start]
-cmd = [
-  "python3",
-  "-c",
-  "import os, uvicorn; port=int(os.getenv('PORT','8000')); uvicorn.run('src.backend.main:app', host='0.0.0.0', port=port)"
-]
+cmd = ["python3", "start_server.py"]
