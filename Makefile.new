@@ -1,0 +1,78 @@
+# SmartLinks Autopilot - Cross-platform development commands
+# Usage: make <command>
+
+.PHONY: help install dev build test clean docker
+
+# Default target
+help:
+	@echo "SmartLinks Autopilot - Available commands:"
+	@echo "  install     - Install all dependencies (Python + Node.js)"
+	@echo "  dev         - Start development servers (backend + frontend)"
+	@echo "  backend     - Start backend server only"
+	@echo "  frontend    - Start frontend server only"
+	@echo "  build       - Build frontend for production"
+	@echo "  test        - Run all tests"
+	@echo "  seed        - Seed database with sample data"
+	@echo "  reset       - Reset database"
+	@echo "  clean       - Clean build artifacts and cache"
+	@echo "  docker      - Build and run with Docker"
+
+# Install dependencies
+install:
+	@echo "Installing Python dependencies..."
+	pip install -r requirements.txt
+	@echo "Installing Node.js dependencies..."
+	cd src/frontend && npm install
+
+# Development mode - start both servers
+dev:
+	@echo "Starting development servers..."
+	@echo "Backend: http://localhost:8000"
+	@echo "Frontend: http://localhost:3000"
+	@make -j2 backend frontend
+
+# Start backend server
+backend:
+	@echo "Starting backend server on http://localhost:8000"
+	python main.py
+
+# Start frontend server
+frontend:
+	@echo "Starting frontend server on http://localhost:3000"
+	cd src/frontend && npm run dev
+
+# Build frontend for production
+build:
+	@echo "Building frontend for production..."
+	cd src/frontend && npm run build
+
+# Run tests
+test:
+	@echo "Running backend tests..."
+	python -m pytest tests/ -v
+	@echo "Running frontend tests..."
+	cd src/frontend && npm test
+
+# Seed database with sample data
+seed:
+	@echo "Seeding database with sample data..."
+	python scripts/seed_database.py
+
+# Reset database
+reset:
+	@echo "Resetting database..."
+	python scripts/reset_database.py
+
+# Clean build artifacts
+clean:
+	@echo "Cleaning build artifacts..."
+	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+	find . -type d -name "node_modules" -exec rm -rf {} + 2>/dev/null || true
+	find . -type d -name ".pytest_cache" -exec rm -rf {} + 2>/dev/null || true
+	rm -rf src/frontend/dist 2>/dev/null || true
+	rm -rf *.log 2>/dev/null || true
+
+# Docker commands
+docker:
+	@echo "Building and running with Docker..."
+	docker-compose up --build

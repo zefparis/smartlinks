@@ -1,0 +1,9 @@
+--- Starting DB Connection Test ---
+Loading .env file...
+Found DATABASE_URL: postgresql+psycopg2://smartlinks_user:smartpass@localhost:5432/smartlinks
+Creating SQLAlchemy engine...
+Attempting to connect to the database...
+Database connection successful!
+SQLAlchemy engine: Engine(postgresql+psycopg2://smartlinks_user:***@localhost:5432/smartlinks)
+Connection object: <sqlalchemy.engine.base.Connection object at 0x000001BFB14BE990>
+--- DB Connection Test Finished Successfully ---

@@ -1,0 +1,3 @@
+@echo off
+echo Starting FastAPI server with debug logging...
+.venv\Scripts\python -c "import logging; logging.basicConfig(level=logging.DEBUG); import uvicorn; uvicorn.run('simple_test:app', host='0.0.0.0', port=8000, log_level='debug', reload=True)"

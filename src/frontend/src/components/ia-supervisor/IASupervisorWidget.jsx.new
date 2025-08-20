@@ -1,0 +1,652 @@
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { 
+  Box, 
+  Button, 
+  Card, 
+  CardContent, 
+  CardHeader, 
+  Chip, 
+  CircularProgress, 
+  Collapse,
+  Divider, 
+  IconButton, 
+  LinearProgress,
+  List, 
+  ListItem, 
+  ListItemIcon,
+  ListItemText, 
+  Paper, 
+  TextField, 
+  ToggleButton, 
+  ToggleButtonGroup, 
+  Tooltip, 
+  Typography,
+  Alert,
+  Snackbar,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  DialogContentText,
+  useTheme
+} from '@mui/material';
+import { 
+  AutoFixHigh, 
+  BugReport, 
+  CheckCircle, 
+  Close,
+  Error as ErrorIcon, 
+  ExpandLess,
+  ExpandMore,
+  Help, 
+  Info, 
+  Refresh, 
+  Search,
+  Send, 
+  Settings, 
+  Warning 
+} from '@mui/icons-material';
+import { styled } from '@mui/material/styles';
+import { useIASupervisor } from '../../hooks/useApi';
+import ErrorBoundary from '../common/ErrorBoundary';
+import { formatDistanceToNow } from 'date-fns';
+
+// Constants and styled components
+const MODE_COLORS = {
+  auto: 'success',
+  manual: 'warning',
+  sandbox: 'info',
+};
+
+const SEVERITY_ICONS = {
+  info: <Info color="info" />,
+  warning: <Warning color="warning" />,
+  error: <ErrorIcon color="error" />,
+  success: <CheckCircle color="success" />,
+};
+
+const StyledCard = styled(Card)(({ theme }) => ({
+  height: '100%',
+  display: 'flex',
+  flexDirection: 'column',
+  borderRadius: theme.shape.borderRadius * 2,
+  boxShadow: theme.shadows[3],
+  '&:hover': {
+    boxShadow: theme.shadows[6],
+  },
+}));
+
+const StyledCardHeader = styled(CardHeader)(({ theme }) => ({
+  backgroundColor: theme.palette.primary.main,
+  color: theme.palette.primary.contrastText,
+  '& .MuiCardHeader-title': {
+    fontWeight: 600,
+  },
+}));
+
+const StyledCardContent = styled(CardContent)(({ theme }) => ({
+  flexGrow: 1,
+  overflow: 'auto',
+  padding: theme.spacing(2),
+  '&::-webkit-scrollbar': {
+    width: '6px',
+  },
+  '&::-webkit-scrollbar-track': {
+    background: theme.palette.grey[200],
+    borderRadius: '3px',
+  },
+  '&::-webkit-scrollbar-thumb': {
+    background: theme.palette.primary.main,
+    borderRadius: '3px',
+  },
+}));
+
+const MessageBubble = styled(Box)(({ theme, isUser }) => ({
+  maxWidth: '80%',
+  padding: theme.spacing(1.5, 2),
+  marginBottom: theme.spacing(1),
+  borderRadius: theme.shape.borderRadius * 2,
+  backgroundColor: isUser 
+    ? theme.palette.primary.light 
+    : theme.palette.grey[100],
+  color: isUser 
+    ? theme.palette.primary.contrastText 
+    : theme.palette.text.primary,
+  alignSelf: isUser ? 'flex-end' : 'flex-start',
+  '& pre': {
+    backgroundColor: isUser 
+      ? 'rgba(255, 255, 255, 0.1)' 
+      : theme.palette.grey[200],
+    padding: theme.spacing(1),
+    borderRadius: theme.shape.borderRadius,
+    overflowX: 'auto',
+  },
+  '& code': {
+    fontFamily: 'monospace',
+    fontSize: '0.85rem',
+  },
+}));
+
+const ActionButton = styled(Button)(({ theme }) => ({
+  margin: theme.spacing(0.5),
+  textTransform: 'none',
+  '& .MuiButton-startIcon': {
+    marginRight: theme.spacing(0.5),
+  },
+}));
+
+const SystemAlert = ({ alert, onDismiss }) => {
+  const [open, setOpen] = useState(true);
+  
+  const handleClose = () => {
+    setOpen(false);
+    onDismiss?.(alert.id);
+  };
+  
+  return (
+    <Collapse in={open}>
+      <Alert 
+        severity={alert.severity}
+        sx={{ mb: 2 }}
+        action={
+          <IconButton
+            aria-label="close"
+            color="inherit"
+            size="small"
+            onClick={handleClose}
+          >
+            <Close fontSize="inherit" />
+          </IconButton>
+        }
+      >
+        <Typography variant="subtitle2">{alert.title}</Typography>
+        <Typography variant="body2">{alert.message}</Typography>
+        {alert.details && (
+          <Box sx={{ mt: 1 }}>
+            <Button 
+              size="small" 
+              onClick={() => setOpen(!open)}
+              endIcon={open ? <ExpandLess /> : <ExpandMore />}
+            >
+              {open ? 'Hide details' : 'Show details'}
+            </Button>
+            <Collapse in={open} timeout="auto" unmountOnExit>
+              <pre style={{ 
+                whiteSpace: 'pre-wrap',
+                fontSize: '0.8em',
+                margin: '8px 0 0',
+                padding: '8px',
+                backgroundColor: 'rgba(0,0,0,0.05)',
+                borderRadius: '4px',
+                maxHeight: '200px',
+                overflowY: 'auto',
+              }}>
+                {JSON.stringify(alert.details, null, 2)}
+              </pre>
+            </Collapse>
+          </Box>
+        )}
+      </Alert>
+    </Collapse>
+  );
+};
+
+const IASupervisorWidget = () => {
+  const theme = useTheme();
+  
+  // State
+  const [inputValue, setInputValue] = useState('');
+  const [openSettings, setOpenSettings] = useState(false);
+  const [localAlerts, setLocalAlerts] = useState([]);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'info',
+  });
+  
+  // Use the enhanced hook
+  const {
+    status,
+    alerts: apiAlerts,
+    logs,
+    loading: isLoading,
+    error,
+    askQuestion,
+    analyzeSystem,
+    fixIssues,
+    switchMode,
+    fetchStatus,
+  } = useIASupervisor();
+  
+  // Combine local and API alerts
+  const alerts = useMemo(() => {
+    return [...localAlerts, ...apiAlerts];
+  }, [localAlerts, apiAlerts]);
+  
+  // Process logs into message format
+  const messages = useMemo(() => {
+    return logs.map(log => ({
+      id: log.id || log.timestamp,
+      text: log.content || log.message || JSON.stringify(log),
+      isUser: log.type === 'question' || log.role === 'user',
+      timestamp: log.timestamp || new Date().toISOString(),
+      severity: log.severity || 'info',
+    }));
+  }, [logs]);
+  
+  // Current mode from status or default to 'auto'
+  const mode = status?.mode || 'auto';
+
+  // Send a message to the AI
+  const handleSendMessage = useCallback(async (message) => {
+    if (!message?.trim()) return;
+    
+    const userMessage = {
+      id: `user-${Date.now()}`,
+      text: message,
+      isUser: true,
+      timestamp: new Date().toISOString(),
+    };
+    
+    try {
+      setInputValue('');
+      await askQuestion(message);
+    } catch (err) {
+      console.error('Error sending message:', err);
+      setSnackbar({
+        open: true,
+        message: 'Failed to send message',
+        severity: 'error',
+      });
+    }
+  }, [askQuestion]);
+
+  // Handle mode change
+  const handleModeChange = async (event, newMode) => {
+    if (newMode === null || newMode === mode) return;
+    
+    try {
+      await switchMode(newMode);
+      setSnackbar({
+        open: true,
+        message: `Switched to ${newMode} mode`,
+        severity: 'success',
+      });
+    } catch (err) {
+      console.error('Error changing mode:', err);
+      setSnackbar({
+        open: true,
+        message: 'Failed to change mode',
+        severity: 'error',
+      });
+    }
+  };
+
+  // Analyze the system
+  const handleAnalyze = async () => {
+    try {
+      await analyzeSystem();
+      setSnackbar({
+        open: true,
+        message: 'System analysis completed',
+        severity: 'success',
+      });
+    } catch (err) {
+      console.error('Error analyzing system:', err);
+      setSnackbar({
+        open: true,
+        message: 'Failed to analyze system',
+        severity: 'error',
+      });
+    }
+  };
+
+  // Fix issues
+  const handleFixIssues = async () => {
+    try {
+      await fixIssues();
+      setSnackbar({
+        open: true,
+        message: 'Issues fixed successfully',
+        severity: 'success',
+      });
+    } catch (err) {
+      console.error('Error fixing issues:', err);
+      setSnackbar({
+        open: true,
+        message: 'Failed to fix issues',
+        severity: 'error',
+      });
+    }
+  };
+
+  // Close snackbar
+  const handleCloseSnackbar = () => {
+    setSnackbar(prev => ({ ...prev, open: false }));
+  };
+
+  // Render message with markdown support
+  const renderMessage = (text) => {
+    if (!text) return null;
+    
+    // Simple markdown parsing for bold text
+    const parts = text.split(/(\*\*.*?\*\*)/g);
+    
+    return parts.map((part, i) => {
+      if (part.startsWith('**') && part.endsWith('**')) {
+        return (
+          <Box key={i} component="span" fontWeight="bold">
+            {part.slice(2, -2)}
+          </Box>
+        );
+      }
+      return part.split('\n').map((line, j, arr) => (
+        <React.Fragment key={`${i}-${j}`}>
+          {line}
+          {j < arr.length - 1 && <br />}
+        </React.Fragment>
+      ));
+    });
+  };
+
+  // Fetch initial status
+  useEffect(() => {
+    const init = async () => {
+      try {
+        await fetchStatus();
+      } catch (err) {
+        console.error('Failed to initialize:', err);
+        setSnackbar({
+          open: true,
+          message: 'Failed to initialize',
+          severity: 'error',
+        });
+      }
+    };
+    
+    init();
+  }, [fetchStatus]);
+
+  return (
+    <ErrorBoundary>
+      <StyledCard elevation={3}>
+        <StyledCardHeader
+          title={
+            <Box display="flex" alignItems="center" justifyContent="space-between">
+              <Box display="flex" alignItems="center">
+                <AutoFixHigh sx={{ mr: 1 }} />
+                <Typography variant="h6">AI Supervisor</Typography>
+              </Box>
+              <Box>
+                <Chip 
+                  label={mode ? mode.toUpperCase() : 'N/A'}
+                  color={mode ? (MODE_COLORS[mode] || 'default') : 'default'}
+                  size="small"
+                  sx={{ color: 'white', fontWeight: 'bold' }}
+                />
+                <Tooltip title="Settings">
+                  <IconButton 
+                    size="small" 
+                    sx={{ ml: 1, color: 'white' }}
+                    onClick={() => setOpenSettings(true)}
+                  >
+                    <Settings />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Refresh">
+                  <IconButton 
+                    size="small" 
+                    sx={{ ml: 0.5, color: 'white' }}
+                    onClick={fetchStatus}
+                    disabled={isLoading}
+                  >
+                    <Refresh />
+                  </IconButton>
+                </Tooltip>
+              </Box>
+            </Box>
+          }
+        />
+        
+        <StyledCardContent>
+          {/* Alerts */}
+          {alerts.length > 0 && (
+            <Box mb={2}>
+              {alerts.map((alert) => (
+                <SystemAlert 
+                  key={alert.id} 
+                  alert={alert} 
+                  onDismiss={handleDismissAlert} 
+                />
+              ))}
+            </Box>
+          )}
+          
+          {/* Messages */}
+          <Box 
+            sx={{ 
+              flexGrow: 1, 
+              mb: 2,
+              display: 'flex',
+              flexDirection: 'column',
+              overflowY: 'auto',
+              minHeight: '200px',
+              maxHeight: '400px',
+              p: 1,
+            }}
+          >
+            {messages.length === 0 ? (
+              <Box 
+                display="flex" 
+                flexDirection="column" 
+                alignItems="center" 
+                justifyContent="center"
+                height="100%"
+                color="text.secondary"
+                textAlign="center"
+                p={2}
+              >
+                <Help sx={{ fontSize: 48, mb: 2, opacity: 0.5 }} />
+                <Typography variant="body2">
+                  Ask me anything about the SmartLinks DG system or request an analysis.
+                </Typography>
+              </Box>
+            ) : (
+              messages.map((message) => (
+                <MessageBubble 
+                  key={message.id} 
+                  isUser={message.isUser}
+                >
+                  {renderMessage(message.text)}
+                  <Typography 
+                    variant="caption" 
+                    display="block" 
+                    textAlign="right"
+                    sx={{ 
+                      mt: 0.5, 
+                      opacity: 0.7,
+                      color: message.isUser ? 'rgba(255, 255, 255, 0.7)' : 'inherit',
+                    }}
+                  >
+                    {new Date(message.timestamp).toLocaleTimeString()}
+                  </Typography>
+                </MessageBubble>
+              ))
+            )}
+            
+            {isLoading && (
+              <Box display="flex" justifyContent="center" my={1}>
+                <CircularProgress size={20} />
+              </Box>
+            )}
+          </Box>
+          
+          {/* Quick actions */}
+          <Box display="flex" flexWrap="wrap" mb={2}>
+            <ActionButton
+              variant="outlined"
+              size="small"
+              startIcon={<BugReport />}
+              onClick={handleAnalyze}
+              disabled={isLoading}
+            >
+              Analyze System
+            </ActionButton>
+            
+            <ActionButton
+              variant="outlined"
+              color="secondary"
+              size="small"
+              startIcon={<AutoFixHigh />}
+              onClick={handleFixIssues}
+              disabled={isLoading || mode === 'manual'}
+              title={mode === 'manual' ? 'Switch to auto mode to fix issues' : ''}
+            >
+              Fix Issues
+            </ActionButton>
+          </Box>
+          
+          {/* Input area */}
+          <Box display="flex" mt="auto">
+            <TextField
+              fullWidth
+              variant="outlined"
+              size="small"
+              placeholder="Ask me anything..."
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSendMessage(inputValue);
+                }
+              }}
+              disabled={isLoading}
+              multiline
+              maxRows={3}
+              sx={{ 
+                mr: 1,
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: '20px',
+                },
+              }}
+            />
+            
+            <Button
+              variant="contained"
+              color="primary"
+              disabled={!inputValue.trim() || isLoading}
+              onClick={() => handleSendMessage(inputValue)}
+              sx={{ 
+                minWidth: '40px', 
+                width: '40px', 
+                height: '40px',
+                borderRadius: '50%',
+              }}
+            >
+              <Send />
+            </Button>
+          </Box>
+        </StyledCardContent>
+        
+        {/* Settings Dialog */}
+        <Dialog 
+          open={openSettings} 
+          onClose={() => setOpenSettings(false)}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle>AI Supervisor Settings</DialogTitle>
+          <DialogContent>
+            <Box mb={3}>
+              <Typography variant="subtitle1" gutterBottom>
+                Operation Mode
+              </Typography>
+              <ToggleButtonGroup
+                color="primary"
+                value={mode}
+                exclusive
+                onChange={handleModeChange}
+                fullWidth
+                sx={{ mb: 2 }}
+              >
+                <ToggleButton value="auto">
+                  <Box textAlign="center" width="100%">
+                    <div>Auto</div>
+                    <Typography variant="caption" display="block" color="text.secondary">
+                      Takes actions automatically
+                    </Typography>
+                  </Box>
+                </ToggleButton>
+                <ToggleButton value="manual">
+                  <Box textAlign="center" width="100%">
+                    <div>Manual</div>
+                    <Typography variant="caption" display="block" color="text.secondary">
+                      Requires approval
+                    </Typography>
+                  </Box>
+                </ToggleButton>
+                <ToggleButton value="sandbox">
+                  <Box textAlign="center" width="100%">
+                    <div>Sandbox</div>
+                    <Typography variant="caption" display="block" color="text.secondary">
+                      Simulates actions
+                    </Typography>
+                  </Box>
+                </ToggleButton>
+              </ToggleButtonGroup>
+              
+              <Divider sx={{ my: 2 }} />
+              
+              <Typography variant="subtitle1" gutterBottom>
+                System Status
+              </Typography>
+              <List dense>
+                <ListItem>
+                  <ListItemText 
+                    primary="Last Analysis" 
+                    secondary={status?.last_analysis_time || 'Never'} 
+                  />
+                </ListItem>
+                <ListItem>
+                  <ListItemText 
+                    primary="Active Alerts" 
+                    secondary={status?.metrics?.alerts?.length || 0} 
+                  />
+                </ListItem>
+                <ListItem>
+                  <ListItemText 
+                    primary="Available Algorithms" 
+                    secondary={status?.available_algorithms?.length || 0} 
+                  />
+                </ListItem>
+              </List>
+            </Box>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setOpenSettings(false)}>Close</Button>
+          </DialogActions>
+        </Dialog>
+        
+        {/* Snackbar for notifications */}
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={6000}
+          onClose={handleCloseSnackbar}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        >
+          <Alert 
+            onClose={handleCloseSnackbar} 
+            severity={snackbar.severity}
+            variant="filled"
+            sx={{ width: '100%' }}
+          >
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
+      </StyledCard>
+    </ErrorBoundary>
+  );
+};
+
+export default IASupervisorWidget;

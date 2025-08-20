@@ -1,0 +1,1 @@
+"""Bandits algorithms package."""

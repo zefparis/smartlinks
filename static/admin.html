@@ -1,0 +1,81 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>⚡ SmartLinks Autopilot - Admin</title>
+  <style>
+    body { font-family: monospace; background:#111; color:#eee; margin:0; padding:20px; }
+    h1 { color:#0f0; margin-bottom:20px; }
+    .card { background:#1a1a1a; padding:15px; border-radius:8px; margin-bottom:20px; box-shadow:0 0 5px #000; }
+    .badge { padding:2px 6px; border-radius:4px; font-weight:bold; }
+    .ok { background:#0f0; color:#000; }
+    .fail { background:#f00; color:#fff; }
+    table { width:100%; border-collapse:collapse; margin-top:10px; }
+    th,td { border:1px solid #333; padding:6px; text-align:left; }
+    th { background:#222; }
+    button { background:#0f0; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; margin:5px 0; font-weight:bold; }
+    button.danger { background:#f00; color:#fff; }
+    pre { background:#000; color:#0f0; padding:10px; border-radius:6px; overflow-y:auto; max-height:200px; }
+  </style>
+  <script>
+    async function refresh() {
+      try {
+        let health = await fetch("/admin/health").then(r=>r.json());
+        document.getElementById("health").innerHTML =
+          `Router: <span class="badge ${health.router?'ok':'fail'}">${health.router}</span> |
+           Autopilot: <span class="badge ${health.autopilot?'ok':'fail'}">${health.autopilot}</span> |
+           TS: ${health.ts}`;
+      } catch(e) { document.getElementById("health").innerText="Erreur health"; }
+
+      try {
+        let metrics = await fetch("/admin/metrics").then(r=>r.json());
+        let segs = metrics.segments.map(s=>`<tr><td>${s.segment}</td><td>${s.count}</td><td>${s.avg_risk}</td></tr>`).join("");
+        document.getElementById("metrics").innerHTML =
+          `<b>Total:</b> ${metrics.clicks_total}<br>
+           <b>Last Click:</b> ${metrics.last_click_id || '-'} @ ${metrics.last_click_time || '-'}
+           <table><tr><th>Segment</th><th>Count</th><th>Avg Risk</th></tr>${segs}</table>`;
+      } catch(e) { document.getElementById("metrics").innerText="Erreur metrics"; }
+
+      try {
+        let stats = await fetch("/admin/stats").then(r=>r.json());
+        document.getElementById("stats").innerHTML =
+          `<b>Fraud Suspects:</b> ${stats.fraud_suspects}<br>
+           <b>Fraud Rate:</b> ${stats.fraud_rate}<br>
+           <b>Approved:</b> ${stats.approved}<br>
+           <b>Approval Rate:</b> ${stats.approval_rate}`;
+      } catch(e) { document.getElementById("stats").innerText="Erreur stats"; }
+    }
+
+    async function reseed(){ await fetch("/admin/seed",{method:"POST"}); refresh(); }
+    async function payout(){ await fetch("/admin/payout",{method:"POST"}); refresh(); }
+    async function flush(){ await fetch("/admin/db/flush",{method:"POST"}); refresh(); }
+
+    window.onload = refresh;
+  </script>
+</head>
+<body>
+  <h1>⚡ SmartLinks Autopilot - Admin</h1>
+
+  <div class="card">
+    <h2>Health</h2>
+    <div id="health">Loading...</div>
+  </div>
+
+  <div class="card">
+    <h2>Métriques</h2>
+    <div id="metrics">Loading...</div>
+  </div>
+
+  <div class="card">
+    <h2>Stats</h2>
+    <div id="stats">Loading...</div>
+  </div>
+
+  <div class="card">
+    <h2>Actions</h2>
+    <button onclick="reseed()">🔄 Re-seed</button>
+    <button onclick="payout()">💰 Update Payout</button>
+    <button class="danger" onclick="flush()">🔥 Flush DB</button>
+  </div>
+</body>
+</html>

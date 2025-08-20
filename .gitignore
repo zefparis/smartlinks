@@ -1,0 +1,14 @@
+node_modules/
+.env
+.DS_Store
+__pycache__/
+*.pyc
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+.virtualenv/
+
+# + tout ce que tu veux ignorer

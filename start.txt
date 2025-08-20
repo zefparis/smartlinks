@@ -1,0 +1,3 @@
+Start-Process powershell.exe -ArgumentList '-NoExit','-Command','cd C:\smartlinks-autopilot; . .\dev.ps1; S1'
+Start-Process powershell.exe -ArgumentList '-NoExit','-Command','cd C:\smartlinks-autopilot; . .\dev.ps1; S2'
+Start-Process powershell.exe -ArgumentList '-NoExit','-Command','cd C:\smartlinks-autopilot; . .\dev.ps1; Smoke -n 5'

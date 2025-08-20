@@ -1,0 +1,1270 @@
+2025-08-20 00:34:23,999 - __main__ - INFO - Starting SmartLinks Autopilot
+2025-08-20 00:34:24,005 - __main__ - INFO - Initializing database...
+2025-08-20 00:34:24,008 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 00:34:24,018 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("offers")
+2025-08-20 00:34:24,020 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 00:34:24,025 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("segments")
+2025-08-20 00:34:24,027 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 00:34:24,033 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("creators")
+2025-08-20 00:34:24,037 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 00:34:24,039 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("clicks")
+2025-08-20 00:34:24,040 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 00:34:24,042 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("conversions")
+2025-08-20 00:34:24,042 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 00:34:24,044 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("payout_rates")
+2025-08-20 00:34:24,049 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 00:34:24,053 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 00:34:24,053 - src.soft.storage - INFO - Database tables created successfully
+2025-08-20 00:34:24,056 - __main__ - INFO - Ensuring default segments exist
+2025-08-20 00:34:24,156 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 00:34:24,190 - sqlalchemy.engine.Engine - INFO - SELECT segments.segment_id AS segments_segment_id, segments.geo AS segments_geo, segments.device AS segments_device 
+FROM segments 
+WHERE segments.segment_id = ?
+ LIMIT ? OFFSET ?
+2025-08-20 00:34:24,207 - sqlalchemy.engine.Engine - INFO - [generated in 0.01715s] ('FR:mobile', 1, 0)
+2025-08-20 00:34:24,210 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 00:34:24,244 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 00:34:24,260 - sqlalchemy.engine.Engine - INFO - SELECT segments.segment_id AS segments_segment_id, segments.geo AS segments_geo, segments.device AS segments_device 
+FROM segments 
+WHERE segments.segment_id = ?
+ LIMIT ? OFFSET ?
+2025-08-20 00:34:24,293 - sqlalchemy.engine.Engine - INFO - [cached since 0.1029s ago] ('FR:desktop', 1, 0)
+2025-08-20 00:34:24,333 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 00:34:24,376 - __main__ - INFO - Default segments ensured
+2025-08-20 00:34:24,392 - __main__ - INFO - Starting autopilot with interval: 600 seconds
+2025-08-20 00:34:24,423 - __main__ - INFO - Starting autopilot iteration
+2025-08-20 00:34:24,437 - __main__ - INFO - Fetching all segments
+2025-08-20 00:34:24,462 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 00:34:24,469 - sqlalchemy.engine.Engine - INFO - SELECT segment_id FROM segments
+2025-08-20 00:34:24,473 - sqlalchemy.engine.Engine - INFO - [generated in 0.00441s] ()
+2025-08-20 00:34:24,479 - __main__ - INFO - Processing segment: FR:desktop
+2025-08-20 00:34:24,491 - sqlalchemy.engine.Engine - INFO - SELECT coalesce(sum(conversions.revenue), ?) AS total_revenue 
+FROM conversions JOIN clicks ON clicks.click_id = conversions.click_id 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND conversions.status = ?
+2025-08-20 00:34:24,503 - sqlalchemy.engine.Engine - INFO - [generated in 0.01255s] (0.0, 'FR:desktop', 1755383664, 'approved')
+2025-08-20 00:34:24,521 - sqlalchemy.engine.Engine - INFO - SELECT count(*) AS count_1 
+FROM (SELECT clicks.click_id AS clicks_click_id, clicks.ts AS clicks_ts, clicks.creator_id AS clicks_creator_id, clicks.slug AS clicks_slug, clicks.segment_id AS clicks_segment_id, clicks.geo AS clicks_geo, clicks.device AS clicks_device, clicks.fp AS clicks_fp, clicks.valid_final AS clicks_valid_final, clicks.risk AS clicks_risk, clicks.offer_id AS clicks_offer_id 
+FROM clicks 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND clicks.valid_final = ?) AS anon_1
+2025-08-20 00:34:24,523 - sqlalchemy.engine.Engine - INFO - [generated in 0.00140s] ('FR:desktop', 1755383664, 1)
+2025-08-20 00:34:24,529 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-08-20 00:34:24,535 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 00:34:24,536 - sqlalchemy.engine.Engine - INFO - 
+                SELECT COALESCE(AVG(CASE WHEN risk >= ? THEN 1.0 ELSE 0.0 END), 0.0)
+                FROM clicks 
+                WHERE ts >= ? AND segment_id = ?
+            
+2025-08-20 00:34:24,540 - sqlalchemy.engine.Engine - INFO - [generated in 0.00351s] (0.8, 1755383664, 'FR:desktop')
+2025-08-20 00:34:24,542 - __main__ - INFO - Setting payout for FR:desktop: 5.0
+2025-08-20 00:34:24,546 - sqlalchemy.engine.Engine - INFO - SELECT payout_rates.segment_id AS payout_rates_segment_id, payout_rates.payout AS payout_rates_payout, payout_rates.updated_at AS payout_rates_updated_at 
+FROM payout_rates 
+WHERE payout_rates.segment_id = ?
+ LIMIT ? OFFSET ?
+2025-08-20 00:34:24,548 - sqlalchemy.engine.Engine - INFO - [generated in 0.00123s] ('FR:desktop', 1, 0)
+2025-08-20 00:34:24,554 - sqlalchemy.engine.Engine - INFO - UPDATE payout_rates SET updated_at=? WHERE payout_rates.segment_id = ?
+2025-08-20 00:34:24,554 - sqlalchemy.engine.Engine - INFO - [generated in 0.00112s] (1755642864, 'FR:desktop')
+2025-08-20 00:34:24,556 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 00:34:24,637 - __main__ - INFO - Processing segment: FR:mobile
+2025-08-20 00:34:24,647 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 00:34:24,650 - sqlalchemy.engine.Engine - INFO - SELECT coalesce(sum(conversions.revenue), ?) AS total_revenue 
+FROM conversions JOIN clicks ON clicks.click_id = conversions.click_id 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND conversions.status = ?
+2025-08-20 00:34:24,650 - sqlalchemy.engine.Engine - INFO - [cached since 0.1613s ago] (0.0, 'FR:mobile', 1755383664, 'approved')
+2025-08-20 00:34:24,654 - sqlalchemy.engine.Engine - INFO - SELECT count(*) AS count_1 
+FROM (SELECT clicks.click_id AS clicks_click_id, clicks.ts AS clicks_ts, clicks.creator_id AS clicks_creator_id, clicks.slug AS clicks_slug, clicks.segment_id AS clicks_segment_id, clicks.geo AS clicks_geo, clicks.device AS clicks_device, clicks.fp AS clicks_fp, clicks.valid_final AS clicks_valid_final, clicks.risk AS clicks_risk, clicks.offer_id AS clicks_offer_id 
+FROM clicks 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND clicks.valid_final = ?) AS anon_1
+2025-08-20 00:34:24,655 - sqlalchemy.engine.Engine - INFO - [cached since 0.1332s ago] ('FR:mobile', 1755383664, 1)
+2025-08-20 00:34:24,658 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-08-20 00:34:24,658 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 00:34:24,658 - sqlalchemy.engine.Engine - INFO - 
+                SELECT COALESCE(AVG(CASE WHEN risk >= ? THEN 1.0 ELSE 0.0 END), 0.0)
+                FROM clicks 
+                WHERE ts >= ? AND segment_id = ?
+            
+2025-08-20 00:34:24,662 - sqlalchemy.engine.Engine - INFO - [cached since 0.1253s ago] (0.8, 1755383664, 'FR:mobile')
+2025-08-20 00:34:24,663 - __main__ - INFO - Setting payout for FR:mobile: 5.0
+2025-08-20 00:34:24,665 - sqlalchemy.engine.Engine - INFO - SELECT payout_rates.segment_id AS payout_rates_segment_id, payout_rates.payout AS payout_rates_payout, payout_rates.updated_at AS payout_rates_updated_at 
+FROM payout_rates 
+WHERE payout_rates.segment_id = ?
+ LIMIT ? OFFSET ?
+2025-08-20 00:34:24,667 - sqlalchemy.engine.Engine - INFO - [cached since 0.1208s ago] ('FR:mobile', 1, 0)
+2025-08-20 00:34:24,670 - sqlalchemy.engine.Engine - INFO - UPDATE payout_rates SET updated_at=? WHERE payout_rates.segment_id = ?
+2025-08-20 00:34:24,672 - sqlalchemy.engine.Engine - INFO - [cached since 0.119s ago] (1755642864, 'FR:mobile')
+2025-08-20 00:34:24,676 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 00:34:24,689 - __main__ - INFO - DB session closed
+2025-08-20 00:34:24,690 - __main__ - INFO - Payout rates updated @ 2025-08-20 00:34:24 (took 0.27s)
+2025-08-20 00:41:55,662 - __main__ - INFO - Starting SmartLinks Autopilot
+2025-08-20 00:41:55,673 - __main__ - INFO - Initializing database...
+2025-08-20 00:41:55,674 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 00:41:55,678 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("offers")
+2025-08-20 00:41:55,680 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 00:41:55,683 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("segments")
+2025-08-20 00:41:55,685 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 00:41:55,686 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("creators")
+2025-08-20 00:41:55,689 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 00:41:55,690 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("clicks")
+2025-08-20 00:41:55,691 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 00:41:55,691 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("conversions")
+2025-08-20 00:41:55,693 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 00:41:55,693 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("payout_rates")
+2025-08-20 00:41:55,695 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 00:41:55,697 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 00:41:55,697 - src.soft.storage - INFO - Database tables created successfully
+2025-08-20 00:41:55,700 - __main__ - INFO - Ensuring default segments exist
+2025-08-20 00:41:55,762 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 00:41:55,769 - sqlalchemy.engine.Engine - INFO - SELECT segments.segment_id AS segments_segment_id, segments.geo AS segments_geo, segments.device AS segments_device 
+FROM segments 
+WHERE segments.segment_id = ?
+ LIMIT ? OFFSET ?
+2025-08-20 00:41:55,774 - sqlalchemy.engine.Engine - INFO - [generated in 0.00329s] ('FR:mobile', 1, 0)
+2025-08-20 00:41:55,776 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 00:41:55,779 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 00:41:55,781 - sqlalchemy.engine.Engine - INFO - SELECT segments.segment_id AS segments_segment_id, segments.geo AS segments_geo, segments.device AS segments_device 
+FROM segments 
+WHERE segments.segment_id = ?
+ LIMIT ? OFFSET ?
+2025-08-20 00:41:55,785 - sqlalchemy.engine.Engine - INFO - [cached since 0.01533s ago] ('FR:desktop', 1, 0)
+2025-08-20 00:41:55,787 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 00:41:55,789 - __main__ - INFO - Default segments ensured
+2025-08-20 00:41:55,790 - __main__ - INFO - Starting autopilot with interval: 600 seconds
+2025-08-20 00:41:55,790 - __main__ - INFO - Starting autopilot iteration
+2025-08-20 00:41:55,792 - __main__ - INFO - Fetching all segments
+2025-08-20 00:41:55,793 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 00:41:55,793 - sqlalchemy.engine.Engine - INFO - SELECT segment_id FROM segments
+2025-08-20 00:41:55,793 - sqlalchemy.engine.Engine - INFO - [generated in 0.00070s] ()
+2025-08-20 00:41:55,796 - __main__ - INFO - Processing segment: FR:desktop
+2025-08-20 00:41:55,801 - sqlalchemy.engine.Engine - INFO - SELECT coalesce(sum(conversions.revenue), ?) AS total_revenue 
+FROM conversions JOIN clicks ON clicks.click_id = conversions.click_id 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND conversions.status = ?
+2025-08-20 00:41:55,804 - sqlalchemy.engine.Engine - INFO - [generated in 0.00116s] (0.0, 'FR:desktop', 1755384115, 'approved')
+2025-08-20 00:41:55,812 - sqlalchemy.engine.Engine - INFO - SELECT count(*) AS count_1 
+FROM (SELECT clicks.click_id AS clicks_click_id, clicks.ts AS clicks_ts, clicks.creator_id AS clicks_creator_id, clicks.slug AS clicks_slug, clicks.segment_id AS clicks_segment_id, clicks.geo AS clicks_geo, clicks.device AS clicks_device, clicks.fp AS clicks_fp, clicks.valid_final AS clicks_valid_final, clicks.risk AS clicks_risk, clicks.offer_id AS clicks_offer_id 
+FROM clicks 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND clicks.valid_final = ?) AS anon_1
+2025-08-20 00:41:55,814 - sqlalchemy.engine.Engine - INFO - [generated in 0.00107s] ('FR:desktop', 1755384115, 1)
+2025-08-20 00:41:55,817 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-08-20 00:41:55,817 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 00:41:55,817 - sqlalchemy.engine.Engine - INFO - 
+                SELECT COALESCE(AVG(CASE WHEN risk >= ? THEN 1.0 ELSE 0.0 END), 0.0)
+                FROM clicks 
+                WHERE ts >= ? AND segment_id = ?
+            
+2025-08-20 00:41:55,817 - sqlalchemy.engine.Engine - INFO - [generated in 0.00093s] (0.8, 1755384115, 'FR:desktop')
+2025-08-20 00:41:55,824 - __main__ - INFO - Setting payout for FR:desktop: 5.0
+2025-08-20 00:41:55,826 - sqlalchemy.engine.Engine - INFO - SELECT payout_rates.segment_id AS payout_rates_segment_id, payout_rates.payout AS payout_rates_payout, payout_rates.updated_at AS payout_rates_updated_at 
+FROM payout_rates 
+WHERE payout_rates.segment_id = ?
+ LIMIT ? OFFSET ?
+2025-08-20 00:41:55,826 - sqlalchemy.engine.Engine - INFO - [generated in 0.00107s] ('FR:desktop', 1, 0)
+2025-08-20 00:41:55,832 - sqlalchemy.engine.Engine - INFO - UPDATE payout_rates SET updated_at=? WHERE payout_rates.segment_id = ?
+2025-08-20 00:41:55,836 - sqlalchemy.engine.Engine - INFO - [generated in 0.00288s] (1755643315, 'FR:desktop')
+2025-08-20 00:41:55,836 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 00:41:55,841 - __main__ - INFO - Processing segment: FR:mobile
+2025-08-20 00:41:55,846 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 00:41:55,847 - sqlalchemy.engine.Engine - INFO - SELECT coalesce(sum(conversions.revenue), ?) AS total_revenue 
+FROM conversions JOIN clicks ON clicks.click_id = conversions.click_id 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND conversions.status = ?
+2025-08-20 00:41:55,848 - sqlalchemy.engine.Engine - INFO - [cached since 0.04615s ago] (0.0, 'FR:mobile', 1755384115, 'approved')
+2025-08-20 00:41:55,852 - sqlalchemy.engine.Engine - INFO - SELECT count(*) AS count_1 
+FROM (SELECT clicks.click_id AS clicks_click_id, clicks.ts AS clicks_ts, clicks.creator_id AS clicks_creator_id, clicks.slug AS clicks_slug, clicks.segment_id AS clicks_segment_id, clicks.geo AS clicks_geo, clicks.device AS clicks_device, clicks.fp AS clicks_fp, clicks.valid_final AS clicks_valid_final, clicks.risk AS clicks_risk, clicks.offer_id AS clicks_offer_id 
+FROM clicks 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND clicks.valid_final = ?) AS anon_1
+2025-08-20 00:41:55,852 - sqlalchemy.engine.Engine - INFO - [cached since 0.03966s ago] ('FR:mobile', 1755384115, 1)
+2025-08-20 00:41:55,855 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-08-20 00:41:55,856 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 00:41:55,858 - sqlalchemy.engine.Engine - INFO - 
+                SELECT COALESCE(AVG(CASE WHEN risk >= ? THEN 1.0 ELSE 0.0 END), 0.0)
+                FROM clicks 
+                WHERE ts >= ? AND segment_id = ?
+            
+2025-08-20 00:41:55,858 - sqlalchemy.engine.Engine - INFO - [cached since 0.03833s ago] (0.8, 1755384115, 'FR:mobile')
+2025-08-20 00:41:55,858 - __main__ - INFO - Setting payout for FR:mobile: 5.0
+2025-08-20 00:41:55,862 - sqlalchemy.engine.Engine - INFO - SELECT payout_rates.segment_id AS payout_rates_segment_id, payout_rates.payout AS payout_rates_payout, payout_rates.updated_at AS payout_rates_updated_at 
+FROM payout_rates 
+WHERE payout_rates.segment_id = ?
+ LIMIT ? OFFSET ?
+2025-08-20 00:41:55,862 - sqlalchemy.engine.Engine - INFO - [cached since 0.03757s ago] ('FR:mobile', 1, 0)
+2025-08-20 00:41:55,862 - sqlalchemy.engine.Engine - INFO - UPDATE payout_rates SET updated_at=? WHERE payout_rates.segment_id = ?
+2025-08-20 00:41:55,866 - sqlalchemy.engine.Engine - INFO - [cached since 0.03358s ago] (1755643315, 'FR:mobile')
+2025-08-20 00:41:55,866 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 00:41:55,866 - __main__ - INFO - DB session closed
+2025-08-20 00:41:55,871 - __main__ - INFO - Payout rates updated @ 2025-08-20 00:41:55 (took 0.08s)
+2025-08-20 00:48:00,729 - __main__ - INFO - Starting SmartLinks Autopilot
+2025-08-20 00:48:00,744 - __main__ - INFO - Initializing database...
+2025-08-20 00:48:00,779 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 00:48:00,787 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("offers")
+2025-08-20 00:48:00,799 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 00:48:00,885 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("segments")
+2025-08-20 00:48:00,916 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 00:48:00,945 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("creators")
+2025-08-20 00:48:00,968 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 00:48:00,988 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("clicks")
+2025-08-20 00:48:01,006 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 00:48:01,037 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("conversions")
+2025-08-20 00:48:01,065 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 00:48:01,094 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("payout_rates")
+2025-08-20 00:48:01,116 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 00:48:01,142 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 00:48:01,160 - src.soft.storage - INFO - Database tables created successfully
+2025-08-20 00:48:01,164 - __main__ - INFO - Ensuring default segments exist
+2025-08-20 00:48:01,322 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 00:48:01,345 - sqlalchemy.engine.Engine - INFO - SELECT segments.segment_id AS segments_segment_id, segments.geo AS segments_geo, segments.device AS segments_device 
+FROM segments 
+WHERE segments.segment_id = ?
+ LIMIT ? OFFSET ?
+2025-08-20 00:48:01,355 - sqlalchemy.engine.Engine - INFO - [generated in 0.01073s] ('FR:mobile', 1, 0)
+2025-08-20 00:48:01,369 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 00:48:01,379 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 00:48:01,384 - sqlalchemy.engine.Engine - INFO - SELECT segments.segment_id AS segments_segment_id, segments.geo AS segments_geo, segments.device AS segments_device 
+FROM segments 
+WHERE segments.segment_id = ?
+ LIMIT ? OFFSET ?
+2025-08-20 00:48:01,392 - sqlalchemy.engine.Engine - INFO - [cached since 0.04725s ago] ('FR:desktop', 1, 0)
+2025-08-20 00:48:01,403 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 00:48:01,414 - __main__ - INFO - Default segments ensured
+2025-08-20 00:48:01,415 - __main__ - INFO - Starting autopilot with interval: 600 seconds
+2025-08-20 00:48:01,423 - __main__ - INFO - Starting autopilot iteration
+2025-08-20 00:48:01,426 - __main__ - INFO - Fetching all segments
+2025-08-20 00:48:01,430 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 00:48:01,440 - sqlalchemy.engine.Engine - INFO - SELECT segment_id FROM segments
+2025-08-20 00:48:01,450 - sqlalchemy.engine.Engine - INFO - [generated in 0.01070s] ()
+2025-08-20 00:48:01,461 - __main__ - INFO - Processing segment: FR:desktop
+2025-08-20 00:48:01,473 - sqlalchemy.engine.Engine - INFO - SELECT coalesce(sum(conversions.revenue), ?) AS total_revenue 
+FROM conversions JOIN clicks ON clicks.click_id = conversions.click_id 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND conversions.status = ?
+2025-08-20 00:48:01,485 - sqlalchemy.engine.Engine - INFO - [generated in 0.01155s] (0.0, 'FR:desktop', 1755384481, 'approved')
+2025-08-20 00:48:01,548 - sqlalchemy.engine.Engine - INFO - SELECT count(*) AS count_1 
+FROM (SELECT clicks.click_id AS clicks_click_id, clicks.ts AS clicks_ts, clicks.creator_id AS clicks_creator_id, clicks.slug AS clicks_slug, clicks.segment_id AS clicks_segment_id, clicks.geo AS clicks_geo, clicks.device AS clicks_device, clicks.fp AS clicks_fp, clicks.valid_final AS clicks_valid_final, clicks.risk AS clicks_risk, clicks.offer_id AS clicks_offer_id 
+FROM clicks 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND clicks.valid_final = ?) AS anon_1
+2025-08-20 00:48:01,563 - sqlalchemy.engine.Engine - INFO - [generated in 0.01488s] ('FR:desktop', 1755384481, 1)
+2025-08-20 00:48:01,599 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-08-20 00:48:01,617 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 00:48:01,653 - sqlalchemy.engine.Engine - INFO - 
+                SELECT COALESCE(AVG(CASE WHEN risk >= ? THEN 1.0 ELSE 0.0 END), 0.0)
+                FROM clicks 
+                WHERE ts >= ? AND segment_id = ?
+            
+2025-08-20 00:48:01,664 - sqlalchemy.engine.Engine - INFO - [generated in 0.01070s] (0.8, 1755384481, 'FR:desktop')
+2025-08-20 00:48:01,678 - __main__ - INFO - Setting payout for FR:desktop: 5.0
+2025-08-20 00:48:01,683 - sqlalchemy.engine.Engine - INFO - SELECT payout_rates.segment_id AS payout_rates_segment_id, payout_rates.payout AS payout_rates_payout, payout_rates.updated_at AS payout_rates_updated_at 
+FROM payout_rates 
+WHERE payout_rates.segment_id = ?
+ LIMIT ? OFFSET ?
+2025-08-20 00:48:01,692 - sqlalchemy.engine.Engine - INFO - [generated in 0.00825s] ('FR:desktop', 1, 0)
+2025-08-20 00:48:01,700 - sqlalchemy.engine.Engine - INFO - UPDATE payout_rates SET updated_at=? WHERE payout_rates.segment_id = ?
+2025-08-20 00:48:01,708 - sqlalchemy.engine.Engine - INFO - [generated in 0.00863s] (1755643681, 'FR:desktop')
+2025-08-20 00:48:01,715 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 00:48:01,722 - __main__ - INFO - Processing segment: FR:mobile
+2025-08-20 00:48:01,726 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 00:48:01,731 - sqlalchemy.engine.Engine - INFO - SELECT coalesce(sum(conversions.revenue), ?) AS total_revenue 
+FROM conversions JOIN clicks ON clicks.click_id = conversions.click_id 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND conversions.status = ?
+2025-08-20 00:48:01,735 - sqlalchemy.engine.Engine - INFO - [cached since 0.2616s ago] (0.0, 'FR:mobile', 1755384481, 'approved')
+2025-08-20 00:48:01,741 - sqlalchemy.engine.Engine - INFO - SELECT count(*) AS count_1 
+FROM (SELECT clicks.click_id AS clicks_click_id, clicks.ts AS clicks_ts, clicks.creator_id AS clicks_creator_id, clicks.slug AS clicks_slug, clicks.segment_id AS clicks_segment_id, clicks.geo AS clicks_geo, clicks.device AS clicks_device, clicks.fp AS clicks_fp, clicks.valid_final AS clicks_valid_final, clicks.risk AS clicks_risk, clicks.offer_id AS clicks_offer_id 
+FROM clicks 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND clicks.valid_final = ?) AS anon_1
+2025-08-20 00:48:01,744 - sqlalchemy.engine.Engine - INFO - [cached since 0.1963s ago] ('FR:mobile', 1755384481, 1)
+2025-08-20 00:48:01,750 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-08-20 00:48:01,755 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 00:48:01,761 - sqlalchemy.engine.Engine - INFO - 
+                SELECT COALESCE(AVG(CASE WHEN risk >= ? THEN 1.0 ELSE 0.0 END), 0.0)
+                FROM clicks 
+                WHERE ts >= ? AND segment_id = ?
+            
+2025-08-20 00:48:01,764 - sqlalchemy.engine.Engine - INFO - [cached since 0.1118s ago] (0.8, 1755384481, 'FR:mobile')
+2025-08-20 00:48:01,774 - __main__ - INFO - Setting payout for FR:mobile: 5.0
+2025-08-20 00:48:01,778 - sqlalchemy.engine.Engine - INFO - SELECT payout_rates.segment_id AS payout_rates_segment_id, payout_rates.payout AS payout_rates_payout, payout_rates.updated_at AS payout_rates_updated_at 
+FROM payout_rates 
+WHERE payout_rates.segment_id = ?
+ LIMIT ? OFFSET ?
+2025-08-20 00:48:01,784 - sqlalchemy.engine.Engine - INFO - [cached since 0.1005s ago] ('FR:mobile', 1, 0)
+2025-08-20 00:48:01,794 - sqlalchemy.engine.Engine - INFO - UPDATE payout_rates SET updated_at=? WHERE payout_rates.segment_id = ?
+2025-08-20 00:48:01,796 - sqlalchemy.engine.Engine - INFO - [cached since 0.09742s ago] (1755643681, 'FR:mobile')
+2025-08-20 00:48:01,799 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 00:48:01,802 - __main__ - INFO - DB session closed
+2025-08-20 00:48:01,808 - __main__ - INFO - Payout rates updated @ 2025-08-20 00:48:01 (took 0.38s)
+2025-08-20 00:55:32,237 - __main__ - INFO - Starting SmartLinks Autopilot
+2025-08-20 00:55:32,248 - __main__ - INFO - Initializing database...
+2025-08-20 00:55:32,256 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 00:55:32,262 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("offers")
+2025-08-20 00:55:32,262 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 00:55:32,288 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("segments")
+2025-08-20 00:55:32,290 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 00:55:32,292 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("creators")
+2025-08-20 00:55:32,292 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 00:55:32,294 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("clicks")
+2025-08-20 00:55:32,294 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 00:55:32,296 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("conversions")
+2025-08-20 00:55:32,302 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 00:55:32,304 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("payout_rates")
+2025-08-20 00:55:32,308 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 00:55:32,310 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 00:55:32,314 - src.soft.storage - INFO - Database tables created successfully
+2025-08-20 00:55:32,317 - __main__ - INFO - Ensuring default segments exist
+2025-08-20 00:55:32,404 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 00:55:32,424 - sqlalchemy.engine.Engine - INFO - SELECT segments.segment_id AS segments_segment_id, segments.geo AS segments_geo, segments.device AS segments_device 
+FROM segments 
+WHERE segments.segment_id = ?
+ LIMIT ? OFFSET ?
+2025-08-20 00:55:32,444 - sqlalchemy.engine.Engine - INFO - [generated in 0.02199s] ('FR:mobile', 1, 0)
+2025-08-20 00:55:32,463 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 00:55:32,489 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 00:55:32,499 - sqlalchemy.engine.Engine - INFO - SELECT segments.segment_id AS segments_segment_id, segments.geo AS segments_geo, segments.device AS segments_device 
+FROM segments 
+WHERE segments.segment_id = ?
+ LIMIT ? OFFSET ?
+2025-08-20 00:55:32,505 - sqlalchemy.engine.Engine - INFO - [cached since 0.08188s ago] ('FR:desktop', 1, 0)
+2025-08-20 00:55:32,510 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 00:55:32,512 - __main__ - INFO - Default segments ensured
+2025-08-20 00:55:32,514 - __main__ - INFO - Starting autopilot with interval: 600 seconds
+2025-08-20 00:55:32,515 - __main__ - INFO - Starting autopilot iteration
+2025-08-20 00:55:32,518 - __main__ - INFO - Fetching all segments
+2025-08-20 00:55:32,519 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 00:55:32,529 - sqlalchemy.engine.Engine - INFO - SELECT segment_id FROM segments
+2025-08-20 00:55:32,531 - sqlalchemy.engine.Engine - INFO - [generated in 0.00263s] ()
+2025-08-20 00:55:32,535 - __main__ - INFO - Processing segment: FR:desktop
+2025-08-20 00:55:32,545 - sqlalchemy.engine.Engine - INFO - SELECT coalesce(sum(conversions.revenue), ?) AS total_revenue 
+FROM conversions JOIN clicks ON clicks.click_id = conversions.click_id 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND conversions.status = ?
+2025-08-20 00:55:32,547 - sqlalchemy.engine.Engine - INFO - [generated in 0.00185s] (0.0, 'FR:desktop', 1755384932, 'approved')
+2025-08-20 00:55:32,558 - sqlalchemy.engine.Engine - INFO - SELECT count(*) AS count_1 
+FROM (SELECT clicks.click_id AS clicks_click_id, clicks.ts AS clicks_ts, clicks.creator_id AS clicks_creator_id, clicks.slug AS clicks_slug, clicks.segment_id AS clicks_segment_id, clicks.geo AS clicks_geo, clicks.device AS clicks_device, clicks.fp AS clicks_fp, clicks.valid_final AS clicks_valid_final, clicks.risk AS clicks_risk, clicks.offer_id AS clicks_offer_id 
+FROM clicks 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND clicks.valid_final = ?) AS anon_1
+2025-08-20 00:55:32,560 - sqlalchemy.engine.Engine - INFO - [generated in 0.00212s] ('FR:desktop', 1755384932, 1)
+2025-08-20 00:55:32,564 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-08-20 00:55:32,565 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 00:55:32,579 - sqlalchemy.engine.Engine - INFO - 
+                SELECT COALESCE(AVG(CASE WHEN risk >= ? THEN 1.0 ELSE 0.0 END), 0.0)
+                FROM clicks 
+                WHERE ts >= ? AND segment_id = ?
+            
+2025-08-20 00:55:32,581 - sqlalchemy.engine.Engine - INFO - [generated in 0.00154s] (0.8, 1755384932, 'FR:desktop')
+2025-08-20 00:55:32,584 - __main__ - INFO - Setting payout for FR:desktop: 5.0
+2025-08-20 00:55:32,587 - sqlalchemy.engine.Engine - INFO - SELECT payout_rates.segment_id AS payout_rates_segment_id, payout_rates.payout AS payout_rates_payout, payout_rates.updated_at AS payout_rates_updated_at 
+FROM payout_rates 
+WHERE payout_rates.segment_id = ?
+ LIMIT ? OFFSET ?
+2025-08-20 00:55:32,588 - sqlalchemy.engine.Engine - INFO - [generated in 0.00145s] ('FR:desktop', 1, 0)
+2025-08-20 00:55:32,592 - sqlalchemy.engine.Engine - INFO - UPDATE payout_rates SET updated_at=? WHERE payout_rates.segment_id = ?
+2025-08-20 00:55:32,594 - sqlalchemy.engine.Engine - INFO - [generated in 0.00173s] (1755644132, 'FR:desktop')
+2025-08-20 00:55:32,596 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 00:55:32,602 - __main__ - INFO - Processing segment: FR:mobile
+2025-08-20 00:55:32,602 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 00:55:32,605 - sqlalchemy.engine.Engine - INFO - SELECT coalesce(sum(conversions.revenue), ?) AS total_revenue 
+FROM conversions JOIN clicks ON clicks.click_id = conversions.click_id 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND conversions.status = ?
+2025-08-20 00:55:32,607 - sqlalchemy.engine.Engine - INFO - [cached since 0.06101s ago] (0.0, 'FR:mobile', 1755384932, 'approved')
+2025-08-20 00:55:32,609 - sqlalchemy.engine.Engine - INFO - SELECT count(*) AS count_1 
+FROM (SELECT clicks.click_id AS clicks_click_id, clicks.ts AS clicks_ts, clicks.creator_id AS clicks_creator_id, clicks.slug AS clicks_slug, clicks.segment_id AS clicks_segment_id, clicks.geo AS clicks_geo, clicks.device AS clicks_device, clicks.fp AS clicks_fp, clicks.valid_final AS clicks_valid_final, clicks.risk AS clicks_risk, clicks.offer_id AS clicks_offer_id 
+FROM clicks 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND clicks.valid_final = ?) AS anon_1
+2025-08-20 00:55:32,611 - sqlalchemy.engine.Engine - INFO - [cached since 0.05295s ago] ('FR:mobile', 1755384932, 1)
+2025-08-20 00:55:32,613 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-08-20 00:55:32,616 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 00:55:32,618 - sqlalchemy.engine.Engine - INFO - 
+                SELECT COALESCE(AVG(CASE WHEN risk >= ? THEN 1.0 ELSE 0.0 END), 0.0)
+                FROM clicks 
+                WHERE ts >= ? AND segment_id = ?
+            
+2025-08-20 00:55:32,620 - sqlalchemy.engine.Engine - INFO - [cached since 0.04019s ago] (0.8, 1755384932, 'FR:mobile')
+2025-08-20 00:55:32,622 - __main__ - INFO - Setting payout for FR:mobile: 5.0
+2025-08-20 00:55:32,622 - sqlalchemy.engine.Engine - INFO - SELECT payout_rates.segment_id AS payout_rates_segment_id, payout_rates.payout AS payout_rates_payout, payout_rates.updated_at AS payout_rates_updated_at 
+FROM payout_rates 
+WHERE payout_rates.segment_id = ?
+ LIMIT ? OFFSET ?
+2025-08-20 00:55:32,624 - sqlalchemy.engine.Engine - INFO - [cached since 0.03676s ago] ('FR:mobile', 1, 0)
+2025-08-20 00:55:32,626 - sqlalchemy.engine.Engine - INFO - UPDATE payout_rates SET updated_at=? WHERE payout_rates.segment_id = ?
+2025-08-20 00:55:32,626 - sqlalchemy.engine.Engine - INFO - [cached since 0.03494s ago] (1755644132, 'FR:mobile')
+2025-08-20 00:55:32,628 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 00:55:32,630 - __main__ - INFO - DB session closed
+2025-08-20 00:55:32,633 - __main__ - INFO - Payout rates updated @ 2025-08-20 00:55:32 (took 0.12s)
+2025-08-20 00:57:33,581 - __main__ - INFO - Starting SmartLinks Autopilot
+2025-08-20 00:57:33,581 - __main__ - INFO - Initializing database...
+2025-08-20 00:57:33,588 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 00:57:33,588 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("offers")
+2025-08-20 00:57:33,590 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 00:57:33,594 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("segments")
+2025-08-20 00:57:33,594 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 00:57:33,597 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("creators")
+2025-08-20 00:57:33,597 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 00:57:33,599 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("clicks")
+2025-08-20 00:57:33,599 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 00:57:33,600 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("conversions")
+2025-08-20 00:57:33,602 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 00:57:33,604 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("payout_rates")
+2025-08-20 00:57:33,604 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 00:57:33,606 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 00:57:33,608 - src.soft.storage - INFO - Database tables created successfully
+2025-08-20 00:57:33,608 - __main__ - INFO - Ensuring default segments exist
+2025-08-20 00:57:33,672 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 00:57:33,686 - sqlalchemy.engine.Engine - INFO - SELECT segments.segment_id AS segments_segment_id, segments.geo AS segments_geo, segments.device AS segments_device 
+FROM segments 
+WHERE segments.segment_id = ?
+ LIMIT ? OFFSET ?
+2025-08-20 00:57:33,692 - sqlalchemy.engine.Engine - INFO - [generated in 0.00455s] ('FR:mobile', 1, 0)
+2025-08-20 00:57:33,694 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 00:57:33,696 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 00:57:33,700 - sqlalchemy.engine.Engine - INFO - SELECT segments.segment_id AS segments_segment_id, segments.geo AS segments_geo, segments.device AS segments_device 
+FROM segments 
+WHERE segments.segment_id = ?
+ LIMIT ? OFFSET ?
+2025-08-20 00:57:33,700 - sqlalchemy.engine.Engine - INFO - [cached since 0.01298s ago] ('FR:desktop', 1, 0)
+2025-08-20 00:57:33,702 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 00:57:33,706 - __main__ - INFO - Default segments ensured
+2025-08-20 00:57:33,706 - __main__ - INFO - Starting autopilot with interval: 600 seconds
+2025-08-20 00:57:33,708 - __main__ - INFO - Starting autopilot iteration
+2025-08-20 00:57:33,710 - __main__ - INFO - Fetching all segments
+2025-08-20 00:57:33,710 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 00:57:33,712 - sqlalchemy.engine.Engine - INFO - SELECT segment_id FROM segments
+2025-08-20 00:57:33,715 - sqlalchemy.engine.Engine - INFO - [generated in 0.00176s] ()
+2025-08-20 00:57:33,717 - __main__ - INFO - Processing segment: FR:desktop
+2025-08-20 00:57:33,724 - sqlalchemy.engine.Engine - INFO - SELECT coalesce(sum(conversions.revenue), ?) AS total_revenue 
+FROM conversions JOIN clicks ON clicks.click_id = conversions.click_id 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND conversions.status = ?
+2025-08-20 00:57:33,726 - sqlalchemy.engine.Engine - INFO - [generated in 0.00172s] (0.0, 'FR:desktop', 1755385053, 'approved')
+2025-08-20 00:57:33,740 - sqlalchemy.engine.Engine - INFO - SELECT count(*) AS count_1 
+FROM (SELECT clicks.click_id AS clicks_click_id, clicks.ts AS clicks_ts, clicks.creator_id AS clicks_creator_id, clicks.slug AS clicks_slug, clicks.segment_id AS clicks_segment_id, clicks.geo AS clicks_geo, clicks.device AS clicks_device, clicks.fp AS clicks_fp, clicks.valid_final AS clicks_valid_final, clicks.risk AS clicks_risk, clicks.offer_id AS clicks_offer_id 
+FROM clicks 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND clicks.valid_final = ?) AS anon_1
+2025-08-20 00:57:33,742 - sqlalchemy.engine.Engine - INFO - [generated in 0.00128s] ('FR:desktop', 1755385053, 1)
+2025-08-20 00:57:33,744 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-08-20 00:57:33,746 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 00:57:33,753 - sqlalchemy.engine.Engine - INFO - 
+                SELECT COALESCE(AVG(CASE WHEN risk >= ? THEN 1.0 ELSE 0.0 END), 0.0)
+                FROM clicks 
+                WHERE ts >= ? AND segment_id = ?
+            
+2025-08-20 00:57:33,754 - sqlalchemy.engine.Engine - INFO - [generated in 0.00212s] (0.8, 1755385053, 'FR:desktop')
+2025-08-20 00:57:33,756 - __main__ - INFO - Setting payout for FR:desktop: 5.0
+2025-08-20 00:57:33,760 - sqlalchemy.engine.Engine - INFO - SELECT payout_rates.segment_id AS payout_rates_segment_id, payout_rates.payout AS payout_rates_payout, payout_rates.updated_at AS payout_rates_updated_at 
+FROM payout_rates 
+WHERE payout_rates.segment_id = ?
+ LIMIT ? OFFSET ?
+2025-08-20 00:57:33,761 - sqlalchemy.engine.Engine - INFO - [generated in 0.00121s] ('FR:desktop', 1, 0)
+2025-08-20 00:57:33,766 - sqlalchemy.engine.Engine - INFO - UPDATE payout_rates SET updated_at=? WHERE payout_rates.segment_id = ?
+2025-08-20 00:57:33,766 - sqlalchemy.engine.Engine - INFO - [generated in 0.00152s] (1755644253, 'FR:desktop')
+2025-08-20 00:57:33,771 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 00:57:33,777 - __main__ - INFO - Processing segment: FR:mobile
+2025-08-20 00:57:33,779 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 00:57:33,781 - sqlalchemy.engine.Engine - INFO - SELECT coalesce(sum(conversions.revenue), ?) AS total_revenue 
+FROM conversions JOIN clicks ON clicks.click_id = conversions.click_id 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND conversions.status = ?
+2025-08-20 00:57:33,786 - sqlalchemy.engine.Engine - INFO - [cached since 0.06103s ago] (0.0, 'FR:mobile', 1755385053, 'approved')
+2025-08-20 00:57:33,788 - sqlalchemy.engine.Engine - INFO - SELECT count(*) AS count_1 
+FROM (SELECT clicks.click_id AS clicks_click_id, clicks.ts AS clicks_ts, clicks.creator_id AS clicks_creator_id, clicks.slug AS clicks_slug, clicks.segment_id AS clicks_segment_id, clicks.geo AS clicks_geo, clicks.device AS clicks_device, clicks.fp AS clicks_fp, clicks.valid_final AS clicks_valid_final, clicks.risk AS clicks_risk, clicks.offer_id AS clicks_offer_id 
+FROM clicks 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND clicks.valid_final = ?) AS anon_1
+2025-08-20 00:57:33,790 - sqlalchemy.engine.Engine - INFO - [cached since 0.04955s ago] ('FR:mobile', 1755385053, 1)
+2025-08-20 00:57:33,792 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-08-20 00:57:33,792 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 00:57:33,794 - sqlalchemy.engine.Engine - INFO - 
+                SELECT COALESCE(AVG(CASE WHEN risk >= ? THEN 1.0 ELSE 0.0 END), 0.0)
+                FROM clicks 
+                WHERE ts >= ? AND segment_id = ?
+            
+2025-08-20 00:57:33,794 - sqlalchemy.engine.Engine - INFO - [cached since 0.04286s ago] (0.8, 1755385053, 'FR:mobile')
+2025-08-20 00:57:33,799 - __main__ - INFO - Setting payout for FR:mobile: 5.0
+2025-08-20 00:57:33,803 - sqlalchemy.engine.Engine - INFO - SELECT payout_rates.segment_id AS payout_rates_segment_id, payout_rates.payout AS payout_rates_payout, payout_rates.updated_at AS payout_rates_updated_at 
+FROM payout_rates 
+WHERE payout_rates.segment_id = ?
+ LIMIT ? OFFSET ?
+2025-08-20 00:57:33,805 - sqlalchemy.engine.Engine - INFO - [cached since 0.04467s ago] ('FR:mobile', 1, 0)
+2025-08-20 00:57:33,807 - sqlalchemy.engine.Engine - INFO - UPDATE payout_rates SET updated_at=? WHERE payout_rates.segment_id = ?
+2025-08-20 00:57:33,807 - sqlalchemy.engine.Engine - INFO - [cached since 0.04191s ago] (1755644253, 'FR:mobile')
+2025-08-20 00:57:33,809 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 00:57:33,811 - __main__ - INFO - DB session closed
+2025-08-20 00:57:33,811 - __main__ - INFO - Payout rates updated @ 2025-08-20 00:57:33 (took 0.10s)
+2025-08-20 01:03:14,128 - __main__ - INFO - Starting SmartLinks Autopilot
+2025-08-20 01:03:14,129 - __main__ - INFO - Initializing database...
+2025-08-20 01:03:14,132 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 01:03:14,134 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("offers")
+2025-08-20 01:03:14,136 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 01:03:14,136 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("segments")
+2025-08-20 01:03:14,136 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 01:03:14,141 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("creators")
+2025-08-20 01:03:14,141 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 01:03:14,146 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("clicks")
+2025-08-20 01:03:14,147 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 01:03:14,147 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("conversions")
+2025-08-20 01:03:14,149 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 01:03:14,149 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("payout_rates")
+2025-08-20 01:03:14,152 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 01:03:14,155 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 01:03:14,158 - src.soft.storage - INFO - Database tables created successfully
+2025-08-20 01:03:14,162 - __main__ - INFO - Ensuring default segments exist
+2025-08-20 01:03:14,233 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 01:03:14,239 - sqlalchemy.engine.Engine - INFO - SELECT segments.segment_id AS segments_segment_id, segments.geo AS segments_geo, segments.device AS segments_device 
+FROM segments 
+WHERE segments.segment_id = ?
+ LIMIT ? OFFSET ?
+2025-08-20 01:03:14,241 - sqlalchemy.engine.Engine - INFO - [generated in 0.00158s] ('FR:mobile', 1, 0)
+2025-08-20 01:03:14,245 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 01:03:14,245 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 01:03:14,245 - sqlalchemy.engine.Engine - INFO - SELECT segments.segment_id AS segments_segment_id, segments.geo AS segments_geo, segments.device AS segments_device 
+FROM segments 
+WHERE segments.segment_id = ?
+ LIMIT ? OFFSET ?
+2025-08-20 01:03:14,248 - sqlalchemy.engine.Engine - INFO - [cached since 0.008198s ago] ('FR:desktop', 1, 0)
+2025-08-20 01:03:14,250 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 01:03:14,252 - __main__ - INFO - Default segments ensured
+2025-08-20 01:03:14,253 - __main__ - INFO - Starting autopilot with interval: 600 seconds
+2025-08-20 01:03:14,253 - __main__ - INFO - Starting autopilot iteration
+2025-08-20 01:03:14,256 - __main__ - INFO - Fetching all segments
+2025-08-20 01:03:14,256 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 01:03:14,256 - sqlalchemy.engine.Engine - INFO - SELECT segment_id FROM segments
+2025-08-20 01:03:14,256 - sqlalchemy.engine.Engine - INFO - [generated in 0.00096s] ()
+2025-08-20 01:03:14,260 - __main__ - INFO - Processing segment: FR:desktop
+2025-08-20 01:03:14,266 - sqlalchemy.engine.Engine - INFO - SELECT coalesce(sum(conversions.revenue), ?) AS total_revenue 
+FROM conversions JOIN clicks ON clicks.click_id = conversions.click_id 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND conversions.status = ?
+2025-08-20 01:03:14,266 - sqlalchemy.engine.Engine - INFO - [generated in 0.00084s] (0.0, 'FR:desktop', 1755385394, 'approved')
+2025-08-20 01:03:14,278 - sqlalchemy.engine.Engine - INFO - SELECT count(*) AS count_1 
+FROM (SELECT clicks.click_id AS clicks_click_id, clicks.ts AS clicks_ts, clicks.creator_id AS clicks_creator_id, clicks.slug AS clicks_slug, clicks.segment_id AS clicks_segment_id, clicks.geo AS clicks_geo, clicks.device AS clicks_device, clicks.fp AS clicks_fp, clicks.valid_final AS clicks_valid_final, clicks.risk AS clicks_risk, clicks.offer_id AS clicks_offer_id 
+FROM clicks 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND clicks.valid_final = ?) AS anon_1
+2025-08-20 01:03:14,279 - sqlalchemy.engine.Engine - INFO - [generated in 0.00259s] ('FR:desktop', 1755385394, 1)
+2025-08-20 01:03:14,282 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-08-20 01:03:14,284 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 01:03:14,285 - sqlalchemy.engine.Engine - INFO - 
+                SELECT COALESCE(AVG(CASE WHEN risk >= ? THEN 1.0 ELSE 0.0 END), 0.0)
+                FROM clicks 
+                WHERE ts >= ? AND segment_id = ?
+            
+2025-08-20 01:03:14,288 - sqlalchemy.engine.Engine - INFO - [generated in 0.00316s] (0.8, 1755385394, 'FR:desktop')
+2025-08-20 01:03:14,290 - __main__ - INFO - Setting payout for FR:desktop: 5.0
+2025-08-20 01:03:14,294 - sqlalchemy.engine.Engine - INFO - SELECT payout_rates.segment_id AS payout_rates_segment_id, payout_rates.payout AS payout_rates_payout, payout_rates.updated_at AS payout_rates_updated_at 
+FROM payout_rates 
+WHERE payout_rates.segment_id = ?
+ LIMIT ? OFFSET ?
+2025-08-20 01:03:14,294 - sqlalchemy.engine.Engine - INFO - [generated in 0.00112s] ('FR:desktop', 1, 0)
+2025-08-20 01:03:14,298 - sqlalchemy.engine.Engine - INFO - UPDATE payout_rates SET updated_at=? WHERE payout_rates.segment_id = ?
+2025-08-20 01:03:14,300 - sqlalchemy.engine.Engine - INFO - [generated in 0.00100s] (1755644594, 'FR:desktop')
+2025-08-20 01:03:14,301 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 01:03:14,308 - __main__ - INFO - Processing segment: FR:mobile
+2025-08-20 01:03:14,311 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 01:03:14,313 - sqlalchemy.engine.Engine - INFO - SELECT coalesce(sum(conversions.revenue), ?) AS total_revenue 
+FROM conversions JOIN clicks ON clicks.click_id = conversions.click_id 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND conversions.status = ?
+2025-08-20 01:03:14,313 - sqlalchemy.engine.Engine - INFO - [cached since 0.04687s ago] (0.0, 'FR:mobile', 1755385394, 'approved')
+2025-08-20 01:03:14,316 - sqlalchemy.engine.Engine - INFO - SELECT count(*) AS count_1 
+FROM (SELECT clicks.click_id AS clicks_click_id, clicks.ts AS clicks_ts, clicks.creator_id AS clicks_creator_id, clicks.slug AS clicks_slug, clicks.segment_id AS clicks_segment_id, clicks.geo AS clicks_geo, clicks.device AS clicks_device, clicks.fp AS clicks_fp, clicks.valid_final AS clicks_valid_final, clicks.risk AS clicks_risk, clicks.offer_id AS clicks_offer_id 
+FROM clicks 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND clicks.valid_final = ?) AS anon_1
+2025-08-20 01:03:14,316 - sqlalchemy.engine.Engine - INFO - [cached since 0.03939s ago] ('FR:mobile', 1755385394, 1)
+2025-08-20 01:03:14,318 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-08-20 01:03:14,320 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 01:03:14,320 - sqlalchemy.engine.Engine - INFO - 
+                SELECT COALESCE(AVG(CASE WHEN risk >= ? THEN 1.0 ELSE 0.0 END), 0.0)
+                FROM clicks 
+                WHERE ts >= ? AND segment_id = ?
+            
+2025-08-20 01:03:14,320 - sqlalchemy.engine.Engine - INFO - [cached since 0.03763s ago] (0.8, 1755385394, 'FR:mobile')
+2025-08-20 01:03:14,324 - __main__ - INFO - Setting payout for FR:mobile: 5.0
+2025-08-20 01:03:14,326 - sqlalchemy.engine.Engine - INFO - SELECT payout_rates.segment_id AS payout_rates_segment_id, payout_rates.payout AS payout_rates_payout, payout_rates.updated_at AS payout_rates_updated_at 
+FROM payout_rates 
+WHERE payout_rates.segment_id = ?
+ LIMIT ? OFFSET ?
+2025-08-20 01:03:14,328 - sqlalchemy.engine.Engine - INFO - [cached since 0.03403s ago] ('FR:mobile', 1, 0)
+2025-08-20 01:03:14,328 - sqlalchemy.engine.Engine - INFO - UPDATE payout_rates SET updated_at=? WHERE payout_rates.segment_id = ?
+2025-08-20 01:03:14,331 - sqlalchemy.engine.Engine - INFO - [cached since 0.03169s ago] (1755644594, 'FR:mobile')
+2025-08-20 01:03:14,332 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 01:03:14,335 - __main__ - INFO - DB session closed
+2025-08-20 01:03:14,336 - __main__ - INFO - Payout rates updated @ 2025-08-20 01:03:14 (took 0.08s)
+2025-08-20 01:13:01,234 - __main__ - INFO - Starting SmartLinks Autopilot
+2025-08-20 01:13:01,234 - __main__ - INFO - Initializing database...
+2025-08-20 01:13:01,240 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 01:13:01,242 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("offers")
+2025-08-20 01:13:01,243 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 01:13:01,247 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("segments")
+2025-08-20 01:13:01,247 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 01:13:01,250 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("creators")
+2025-08-20 01:13:01,250 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 01:13:01,253 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("clicks")
+2025-08-20 01:13:01,253 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 01:13:01,257 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("conversions")
+2025-08-20 01:13:01,259 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 01:13:01,260 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("payout_rates")
+2025-08-20 01:13:01,263 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 01:13:01,266 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 01:13:01,269 - src.soft.storage - INFO - Database tables created successfully
+2025-08-20 01:13:01,270 - __main__ - INFO - Ensuring default segments exist
+2025-08-20 01:13:01,335 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 01:13:01,342 - sqlalchemy.engine.Engine - INFO - SELECT segments.segment_id AS segments_segment_id, segments.geo AS segments_geo, segments.device AS segments_device 
+FROM segments 
+WHERE segments.segment_id = ?
+ LIMIT ? OFFSET ?
+2025-08-20 01:13:01,342 - sqlalchemy.engine.Engine - INFO - [generated in 0.00135s] ('FR:mobile', 1, 0)
+2025-08-20 01:13:01,344 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 01:13:01,344 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 01:13:01,350 - sqlalchemy.engine.Engine - INFO - SELECT segments.segment_id AS segments_segment_id, segments.geo AS segments_geo, segments.device AS segments_device 
+FROM segments 
+WHERE segments.segment_id = ?
+ LIMIT ? OFFSET ?
+2025-08-20 01:13:01,350 - sqlalchemy.engine.Engine - INFO - [cached since 0.009303s ago] ('FR:desktop', 1, 0)
+2025-08-20 01:13:01,354 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 01:13:01,356 - __main__ - INFO - Default segments ensured
+2025-08-20 01:13:01,358 - __main__ - INFO - Starting autopilot with interval: 600 seconds
+2025-08-20 01:13:01,360 - __main__ - INFO - Starting autopilot iteration
+2025-08-20 01:13:01,360 - __main__ - INFO - Fetching all segments
+2025-08-20 01:13:01,362 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 01:13:01,362 - sqlalchemy.engine.Engine - INFO - SELECT segment_id FROM segments
+2025-08-20 01:13:01,365 - sqlalchemy.engine.Engine - INFO - [generated in 0.00087s] ()
+2025-08-20 01:13:01,366 - __main__ - INFO - Processing segment: FR:desktop
+2025-08-20 01:13:01,371 - sqlalchemy.engine.Engine - INFO - SELECT coalesce(sum(conversions.revenue), ?) AS total_revenue 
+FROM conversions JOIN clicks ON clicks.click_id = conversions.click_id 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND conversions.status = ?
+2025-08-20 01:13:01,374 - sqlalchemy.engine.Engine - INFO - [generated in 0.00255s] (0.0, 'FR:desktop', 1755385981, 'approved')
+2025-08-20 01:13:01,382 - sqlalchemy.engine.Engine - INFO - SELECT count(*) AS count_1 
+FROM (SELECT clicks.click_id AS clicks_click_id, clicks.ts AS clicks_ts, clicks.creator_id AS clicks_creator_id, clicks.slug AS clicks_slug, clicks.segment_id AS clicks_segment_id, clicks.geo AS clicks_geo, clicks.device AS clicks_device, clicks.fp AS clicks_fp, clicks.valid_final AS clicks_valid_final, clicks.risk AS clicks_risk, clicks.offer_id AS clicks_offer_id 
+FROM clicks 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND clicks.valid_final = ?) AS anon_1
+2025-08-20 01:13:01,384 - sqlalchemy.engine.Engine - INFO - [generated in 0.00128s] ('FR:desktop', 1755385981, 1)
+2025-08-20 01:13:01,386 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-08-20 01:13:01,388 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 01:13:01,390 - sqlalchemy.engine.Engine - INFO - 
+                SELECT COALESCE(AVG(CASE WHEN risk >= ? THEN 1.0 ELSE 0.0 END), 0.0)
+                FROM clicks 
+                WHERE ts >= ? AND segment_id = ?
+            
+2025-08-20 01:13:01,392 - sqlalchemy.engine.Engine - INFO - [generated in 0.00250s] (0.8, 1755385981, 'FR:desktop')
+2025-08-20 01:13:01,394 - __main__ - INFO - Setting payout for FR:desktop: 5.0
+2025-08-20 01:13:01,396 - sqlalchemy.engine.Engine - INFO - SELECT payout_rates.segment_id AS payout_rates_segment_id, payout_rates.payout AS payout_rates_payout, payout_rates.updated_at AS payout_rates_updated_at 
+FROM payout_rates 
+WHERE payout_rates.segment_id = ?
+ LIMIT ? OFFSET ?
+2025-08-20 01:13:01,398 - sqlalchemy.engine.Engine - INFO - [generated in 0.00109s] ('FR:desktop', 1, 0)
+2025-08-20 01:13:01,402 - sqlalchemy.engine.Engine - INFO - UPDATE payout_rates SET updated_at=? WHERE payout_rates.segment_id = ?
+2025-08-20 01:13:01,404 - sqlalchemy.engine.Engine - INFO - [generated in 0.00131s] (1755645181, 'FR:desktop')
+2025-08-20 01:13:01,408 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 01:13:01,415 - __main__ - INFO - Processing segment: FR:mobile
+2025-08-20 01:13:01,417 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 01:13:01,419 - sqlalchemy.engine.Engine - INFO - SELECT coalesce(sum(conversions.revenue), ?) AS total_revenue 
+FROM conversions JOIN clicks ON clicks.click_id = conversions.click_id 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND conversions.status = ?
+2025-08-20 01:13:01,419 - sqlalchemy.engine.Engine - INFO - [cached since 0.0482s ago] (0.0, 'FR:mobile', 1755385981, 'approved')
+2025-08-20 01:13:01,421 - sqlalchemy.engine.Engine - INFO - SELECT count(*) AS count_1 
+FROM (SELECT clicks.click_id AS clicks_click_id, clicks.ts AS clicks_ts, clicks.creator_id AS clicks_creator_id, clicks.slug AS clicks_slug, clicks.segment_id AS clicks_segment_id, clicks.geo AS clicks_geo, clicks.device AS clicks_device, clicks.fp AS clicks_fp, clicks.valid_final AS clicks_valid_final, clicks.risk AS clicks_risk, clicks.offer_id AS clicks_offer_id 
+FROM clicks 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND clicks.valid_final = ?) AS anon_1
+2025-08-20 01:13:01,424 - sqlalchemy.engine.Engine - INFO - [cached since 0.04103s ago] ('FR:mobile', 1755385981, 1)
+2025-08-20 01:13:01,425 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-08-20 01:13:01,425 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 01:13:01,425 - sqlalchemy.engine.Engine - INFO - 
+                SELECT COALESCE(AVG(CASE WHEN risk >= ? THEN 1.0 ELSE 0.0 END), 0.0)
+                FROM clicks 
+                WHERE ts >= ? AND segment_id = ?
+            
+2025-08-20 01:13:01,425 - sqlalchemy.engine.Engine - INFO - [cached since 0.03888s ago] (0.8, 1755385981, 'FR:mobile')
+2025-08-20 01:13:01,425 - __main__ - INFO - Setting payout for FR:mobile: 5.0
+2025-08-20 01:13:01,433 - sqlalchemy.engine.Engine - INFO - SELECT payout_rates.segment_id AS payout_rates_segment_id, payout_rates.payout AS payout_rates_payout, payout_rates.updated_at AS payout_rates_updated_at 
+FROM payout_rates 
+WHERE payout_rates.segment_id = ?
+ LIMIT ? OFFSET ?
+2025-08-20 01:13:01,434 - sqlalchemy.engine.Engine - INFO - [cached since 0.03658s ago] ('FR:mobile', 1, 0)
+2025-08-20 01:13:01,435 - sqlalchemy.engine.Engine - INFO - UPDATE payout_rates SET updated_at=? WHERE payout_rates.segment_id = ?
+2025-08-20 01:13:01,435 - sqlalchemy.engine.Engine - INFO - [cached since 0.03417s ago] (1755645181, 'FR:mobile')
+2025-08-20 01:13:01,435 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 01:13:01,441 - __main__ - INFO - DB session closed
+2025-08-20 01:13:01,441 - __main__ - INFO - Payout rates updated @ 2025-08-20 01:13:01 (took 0.08s)
+2025-08-20 01:22:39,916 - __main__ - INFO - Starting SmartLinks Autopilot
+2025-08-20 01:22:39,916 - __main__ - INFO - Initializing database...
+2025-08-20 01:22:39,920 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 01:22:39,921 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("offers")
+2025-08-20 01:22:39,923 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 01:22:39,926 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("segments")
+2025-08-20 01:22:39,926 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 01:22:39,926 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("creators")
+2025-08-20 01:22:39,930 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 01:22:39,931 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("clicks")
+2025-08-20 01:22:39,931 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 01:22:39,931 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("conversions")
+2025-08-20 01:22:39,936 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 01:22:39,939 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("payout_rates")
+2025-08-20 01:22:39,939 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 01:22:39,941 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 01:22:39,943 - src.soft.storage - INFO - Database tables created successfully
+2025-08-20 01:22:39,943 - __main__ - INFO - Ensuring default segments exist
+2025-08-20 01:22:40,003 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 01:22:40,010 - sqlalchemy.engine.Engine - INFO - SELECT segments.segment_id AS segments_segment_id, segments.geo AS segments_geo, segments.device AS segments_device 
+FROM segments 
+WHERE segments.segment_id = ?
+ LIMIT ? OFFSET ?
+2025-08-20 01:22:40,010 - sqlalchemy.engine.Engine - INFO - [generated in 0.00134s] ('FR:mobile', 1, 0)
+2025-08-20 01:22:40,015 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 01:22:40,016 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 01:22:40,018 - sqlalchemy.engine.Engine - INFO - SELECT segments.segment_id AS segments_segment_id, segments.geo AS segments_geo, segments.device AS segments_device 
+FROM segments 
+WHERE segments.segment_id = ?
+ LIMIT ? OFFSET ?
+2025-08-20 01:22:40,019 - sqlalchemy.engine.Engine - INFO - [cached since 0.009174s ago] ('FR:desktop', 1, 0)
+2025-08-20 01:22:40,022 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 01:22:40,022 - __main__ - INFO - Default segments ensured
+2025-08-20 01:22:40,022 - __main__ - INFO - Starting autopilot with interval: 600 seconds
+2025-08-20 01:22:40,025 - __main__ - INFO - Starting autopilot iteration
+2025-08-20 01:22:40,025 - __main__ - INFO - Fetching all segments
+2025-08-20 01:22:40,027 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 01:22:40,031 - sqlalchemy.engine.Engine - INFO - SELECT segment_id FROM segments
+2025-08-20 01:22:40,032 - sqlalchemy.engine.Engine - INFO - [generated in 0.00109s] ()
+2025-08-20 01:22:40,032 - __main__ - INFO - Processing segment: FR:desktop
+2025-08-20 01:22:40,041 - sqlalchemy.engine.Engine - INFO - SELECT coalesce(sum(conversions.revenue), ?) AS total_revenue 
+FROM conversions JOIN clicks ON clicks.click_id = conversions.click_id 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND conversions.status = ?
+2025-08-20 01:22:40,045 - sqlalchemy.engine.Engine - INFO - [generated in 0.00410s] (0.0, 'FR:desktop', 1755386560, 'approved')
+2025-08-20 01:22:40,060 - sqlalchemy.engine.Engine - INFO - SELECT count(*) AS count_1 
+FROM (SELECT clicks.click_id AS clicks_click_id, clicks.ts AS clicks_ts, clicks.creator_id AS clicks_creator_id, clicks.slug AS clicks_slug, clicks.segment_id AS clicks_segment_id, clicks.geo AS clicks_geo, clicks.device AS clicks_device, clicks.fp AS clicks_fp, clicks.valid_final AS clicks_valid_final, clicks.risk AS clicks_risk, clicks.offer_id AS clicks_offer_id 
+FROM clicks 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND clicks.valid_final = ?) AS anon_1
+2025-08-20 01:22:40,060 - sqlalchemy.engine.Engine - INFO - [generated in 0.00130s] ('FR:desktop', 1755386560, 1)
+2025-08-20 01:22:40,062 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-08-20 01:22:40,064 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 01:22:40,066 - sqlalchemy.engine.Engine - INFO - 
+                SELECT COALESCE(AVG(CASE WHEN risk >= ? THEN 1.0 ELSE 0.0 END), 0.0)
+                FROM clicks 
+                WHERE ts >= ? AND segment_id = ?
+            
+2025-08-20 01:22:40,066 - sqlalchemy.engine.Engine - INFO - [generated in 0.00124s] (0.8, 1755386560, 'FR:desktop')
+2025-08-20 01:22:40,070 - __main__ - INFO - Setting payout for FR:desktop: 5.0
+2025-08-20 01:22:40,073 - sqlalchemy.engine.Engine - INFO - SELECT payout_rates.segment_id AS payout_rates_segment_id, payout_rates.payout AS payout_rates_payout, payout_rates.updated_at AS payout_rates_updated_at 
+FROM payout_rates 
+WHERE payout_rates.segment_id = ?
+ LIMIT ? OFFSET ?
+2025-08-20 01:22:40,074 - sqlalchemy.engine.Engine - INFO - [generated in 0.00180s] ('FR:desktop', 1, 0)
+2025-08-20 01:22:40,078 - sqlalchemy.engine.Engine - INFO - UPDATE payout_rates SET updated_at=? WHERE payout_rates.segment_id = ?
+2025-08-20 01:22:40,078 - sqlalchemy.engine.Engine - INFO - [generated in 0.00122s] (1755645760, 'FR:desktop')
+2025-08-20 01:22:40,081 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 01:22:40,089 - __main__ - INFO - Processing segment: FR:mobile
+2025-08-20 01:22:40,089 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 01:22:40,089 - sqlalchemy.engine.Engine - INFO - SELECT coalesce(sum(conversions.revenue), ?) AS total_revenue 
+FROM conversions JOIN clicks ON clicks.click_id = conversions.click_id 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND conversions.status = ?
+2025-08-20 01:22:40,089 - sqlalchemy.engine.Engine - INFO - [cached since 0.0526s ago] (0.0, 'FR:mobile', 1755386560, 'approved')
+2025-08-20 01:22:40,095 - sqlalchemy.engine.Engine - INFO - SELECT count(*) AS count_1 
+FROM (SELECT clicks.click_id AS clicks_click_id, clicks.ts AS clicks_ts, clicks.creator_id AS clicks_creator_id, clicks.slug AS clicks_slug, clicks.segment_id AS clicks_segment_id, clicks.geo AS clicks_geo, clicks.device AS clicks_device, clicks.fp AS clicks_fp, clicks.valid_final AS clicks_valid_final, clicks.risk AS clicks_risk, clicks.offer_id AS clicks_offer_id 
+FROM clicks 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND clicks.valid_final = ?) AS anon_1
+2025-08-20 01:22:40,095 - sqlalchemy.engine.Engine - INFO - [cached since 0.03794s ago] ('FR:mobile', 1755386560, 1)
+2025-08-20 01:22:40,099 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-08-20 01:22:40,099 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 01:22:40,103 - sqlalchemy.engine.Engine - INFO - 
+                SELECT COALESCE(AVG(CASE WHEN risk >= ? THEN 1.0 ELSE 0.0 END), 0.0)
+                FROM clicks 
+                WHERE ts >= ? AND segment_id = ?
+            
+2025-08-20 01:22:40,107 - sqlalchemy.engine.Engine - INFO - [cached since 0.04143s ago] (0.8, 1755386560, 'FR:mobile')
+2025-08-20 01:22:40,109 - __main__ - INFO - Setting payout for FR:mobile: 5.0
+2025-08-20 01:22:40,109 - sqlalchemy.engine.Engine - INFO - SELECT payout_rates.segment_id AS payout_rates_segment_id, payout_rates.payout AS payout_rates_payout, payout_rates.updated_at AS payout_rates_updated_at 
+FROM payout_rates 
+WHERE payout_rates.segment_id = ?
+ LIMIT ? OFFSET ?
+2025-08-20 01:22:40,112 - sqlalchemy.engine.Engine - INFO - [cached since 0.03838s ago] ('FR:mobile', 1, 0)
+2025-08-20 01:22:40,112 - sqlalchemy.engine.Engine - INFO - UPDATE payout_rates SET updated_at=? WHERE payout_rates.segment_id = ?
+2025-08-20 01:22:40,115 - sqlalchemy.engine.Engine - INFO - [cached since 0.03487s ago] (1755645760, 'FR:mobile')
+2025-08-20 01:22:40,116 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 01:22:40,118 - __main__ - INFO - DB session closed
+2025-08-20 01:22:40,120 - __main__ - INFO - Payout rates updated @ 2025-08-20 01:22:40 (took 0.10s)
+2025-08-20 01:29:57,890 - __main__ - INFO - Starting SmartLinks Autopilot
+2025-08-20 01:29:57,890 - __main__ - INFO - Initializing database...
+2025-08-20 01:29:57,896 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 01:29:57,900 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("offers")
+2025-08-20 01:29:57,903 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 01:29:57,920 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("segments")
+2025-08-20 01:29:57,920 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 01:29:57,922 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("creators")
+2025-08-20 01:29:57,925 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 01:29:57,927 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("clicks")
+2025-08-20 01:29:57,927 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 01:29:57,932 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("conversions")
+2025-08-20 01:29:57,932 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 01:29:57,934 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("payout_rates")
+2025-08-20 01:29:57,935 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 01:29:57,936 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 01:29:57,937 - src.soft.storage - INFO - Database tables created successfully
+2025-08-20 01:29:57,937 - __main__ - INFO - Ensuring default segments exist
+2025-08-20 01:29:57,999 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 01:29:58,005 - sqlalchemy.engine.Engine - INFO - SELECT segments.segment_id AS segments_segment_id, segments.geo AS segments_geo, segments.device AS segments_device 
+FROM segments 
+WHERE segments.segment_id = ?
+ LIMIT ? OFFSET ?
+2025-08-20 01:29:58,005 - sqlalchemy.engine.Engine - INFO - [generated in 0.00140s] ('FR:mobile', 1, 0)
+2025-08-20 01:29:58,012 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 01:29:58,013 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 01:29:58,015 - sqlalchemy.engine.Engine - INFO - SELECT segments.segment_id AS segments_segment_id, segments.geo AS segments_geo, segments.device AS segments_device 
+FROM segments 
+WHERE segments.segment_id = ?
+ LIMIT ? OFFSET ?
+2025-08-20 01:29:58,015 - sqlalchemy.engine.Engine - INFO - [cached since 0.01058s ago] ('FR:desktop', 1, 0)
+2025-08-20 01:29:58,017 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 01:29:58,019 - __main__ - INFO - Default segments ensured
+2025-08-20 01:29:58,019 - __main__ - INFO - Starting autopilot with interval: 600 seconds
+2025-08-20 01:29:58,021 - __main__ - INFO - Starting autopilot iteration
+2025-08-20 01:29:58,021 - __main__ - INFO - Fetching all segments
+2025-08-20 01:29:58,023 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 01:29:58,026 - sqlalchemy.engine.Engine - INFO - SELECT segment_id FROM segments
+2025-08-20 01:29:58,026 - sqlalchemy.engine.Engine - INFO - [generated in 0.00106s] ()
+2025-08-20 01:29:58,028 - __main__ - INFO - Processing segment: FR:desktop
+2025-08-20 01:29:58,034 - sqlalchemy.engine.Engine - INFO - SELECT coalesce(sum(conversions.revenue), ?) AS total_revenue 
+FROM conversions JOIN clicks ON clicks.click_id = conversions.click_id 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND conversions.status = ?
+2025-08-20 01:29:58,035 - sqlalchemy.engine.Engine - INFO - [generated in 0.00223s] (0.0, 'FR:desktop', 1755386998, 'approved')
+2025-08-20 01:29:58,047 - sqlalchemy.engine.Engine - INFO - SELECT count(*) AS count_1 
+FROM (SELECT clicks.click_id AS clicks_click_id, clicks.ts AS clicks_ts, clicks.creator_id AS clicks_creator_id, clicks.slug AS clicks_slug, clicks.segment_id AS clicks_segment_id, clicks.geo AS clicks_geo, clicks.device AS clicks_device, clicks.fp AS clicks_fp, clicks.valid_final AS clicks_valid_final, clicks.risk AS clicks_risk, clicks.offer_id AS clicks_offer_id 
+FROM clicks 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND clicks.valid_final = ?) AS anon_1
+2025-08-20 01:29:58,049 - sqlalchemy.engine.Engine - INFO - [generated in 0.00123s] ('FR:desktop', 1755386998, 1)
+2025-08-20 01:29:58,051 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-08-20 01:29:58,053 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 01:29:58,055 - sqlalchemy.engine.Engine - INFO - 
+                SELECT COALESCE(AVG(CASE WHEN risk >= ? THEN 1.0 ELSE 0.0 END), 0.0)
+                FROM clicks 
+                WHERE ts >= ? AND segment_id = ?
+            
+2025-08-20 01:29:58,055 - sqlalchemy.engine.Engine - INFO - [generated in 0.00117s] (0.8, 1755386998, 'FR:desktop')
+2025-08-20 01:29:58,059 - __main__ - INFO - Setting payout for FR:desktop: 5.0
+2025-08-20 01:29:58,062 - sqlalchemy.engine.Engine - INFO - SELECT payout_rates.segment_id AS payout_rates_segment_id, payout_rates.payout AS payout_rates_payout, payout_rates.updated_at AS payout_rates_updated_at 
+FROM payout_rates 
+WHERE payout_rates.segment_id = ?
+ LIMIT ? OFFSET ?
+2025-08-20 01:29:58,064 - sqlalchemy.engine.Engine - INFO - [generated in 0.00150s] ('FR:desktop', 1, 0)
+2025-08-20 01:29:58,068 - sqlalchemy.engine.Engine - INFO - UPDATE payout_rates SET updated_at=? WHERE payout_rates.segment_id = ?
+2025-08-20 01:29:58,069 - sqlalchemy.engine.Engine - INFO - [generated in 0.00127s] (1755646198, 'FR:desktop')
+2025-08-20 01:29:58,069 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 01:29:58,077 - __main__ - INFO - Processing segment: FR:mobile
+2025-08-20 01:29:58,079 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 01:29:58,081 - sqlalchemy.engine.Engine - INFO - SELECT coalesce(sum(conversions.revenue), ?) AS total_revenue 
+FROM conversions JOIN clicks ON clicks.click_id = conversions.click_id 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND conversions.status = ?
+2025-08-20 01:29:58,082 - sqlalchemy.engine.Engine - INFO - [cached since 0.04798s ago] (0.0, 'FR:mobile', 1755386998, 'approved')
+2025-08-20 01:29:58,084 - sqlalchemy.engine.Engine - INFO - SELECT count(*) AS count_1 
+FROM (SELECT clicks.click_id AS clicks_click_id, clicks.ts AS clicks_ts, clicks.creator_id AS clicks_creator_id, clicks.slug AS clicks_slug, clicks.segment_id AS clicks_segment_id, clicks.geo AS clicks_geo, clicks.device AS clicks_device, clicks.fp AS clicks_fp, clicks.valid_final AS clicks_valid_final, clicks.risk AS clicks_risk, clicks.offer_id AS clicks_offer_id 
+FROM clicks 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND clicks.valid_final = ?) AS anon_1
+2025-08-20 01:29:58,085 - sqlalchemy.engine.Engine - INFO - [cached since 0.03755s ago] ('FR:mobile', 1755386998, 1)
+2025-08-20 01:29:58,088 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-08-20 01:29:58,088 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 01:29:58,090 - sqlalchemy.engine.Engine - INFO - 
+                SELECT COALESCE(AVG(CASE WHEN risk >= ? THEN 1.0 ELSE 0.0 END), 0.0)
+                FROM clicks 
+                WHERE ts >= ? AND segment_id = ?
+            
+2025-08-20 01:29:58,092 - sqlalchemy.engine.Engine - INFO - [cached since 0.03793s ago] (0.8, 1755386998, 'FR:mobile')
+2025-08-20 01:29:58,094 - __main__ - INFO - Setting payout for FR:mobile: 5.0
+2025-08-20 01:29:58,096 - sqlalchemy.engine.Engine - INFO - SELECT payout_rates.segment_id AS payout_rates_segment_id, payout_rates.payout AS payout_rates_payout, payout_rates.updated_at AS payout_rates_updated_at 
+FROM payout_rates 
+WHERE payout_rates.segment_id = ?
+ LIMIT ? OFFSET ?
+2025-08-20 01:29:58,096 - sqlalchemy.engine.Engine - INFO - [cached since 0.03431s ago] ('FR:mobile', 1, 0)
+2025-08-20 01:29:58,099 - sqlalchemy.engine.Engine - INFO - UPDATE payout_rates SET updated_at=? WHERE payout_rates.segment_id = ?
+2025-08-20 01:29:58,100 - sqlalchemy.engine.Engine - INFO - [cached since 0.03196s ago] (1755646198, 'FR:mobile')
+2025-08-20 01:29:58,101 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 01:29:58,103 - __main__ - INFO - DB session closed
+2025-08-20 01:29:58,103 - __main__ - INFO - Payout rates updated @ 2025-08-20 01:29:58 (took 0.08s)
+2025-08-20 01:39:58,024 - __main__ - INFO - Starting autopilot iteration
+2025-08-20 01:39:58,025 - __main__ - INFO - Fetching all segments
+2025-08-20 01:39:58,047 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 01:39:58,049 - sqlalchemy.engine.Engine - INFO - SELECT segment_id FROM segments
+2025-08-20 01:39:58,049 - sqlalchemy.engine.Engine - INFO - [cached since 600s ago] ()
+2025-08-20 01:39:58,052 - __main__ - INFO - Processing segment: FR:desktop
+2025-08-20 01:39:58,052 - sqlalchemy.engine.Engine - INFO - SELECT coalesce(sum(conversions.revenue), ?) AS total_revenue 
+FROM conversions JOIN clicks ON clicks.click_id = conversions.click_id 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND conversions.status = ?
+2025-08-20 01:39:58,052 - sqlalchemy.engine.Engine - INFO - [cached since 600s ago] (0.0, 'FR:desktop', 1755387598, 'approved')
+2025-08-20 01:39:58,062 - sqlalchemy.engine.Engine - INFO - SELECT count(*) AS count_1 
+FROM (SELECT clicks.click_id AS clicks_click_id, clicks.ts AS clicks_ts, clicks.creator_id AS clicks_creator_id, clicks.slug AS clicks_slug, clicks.segment_id AS clicks_segment_id, clicks.geo AS clicks_geo, clicks.device AS clicks_device, clicks.fp AS clicks_fp, clicks.valid_final AS clicks_valid_final, clicks.risk AS clicks_risk, clicks.offer_id AS clicks_offer_id 
+FROM clicks 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND clicks.valid_final = ?) AS anon_1
+2025-08-20 01:39:58,064 - sqlalchemy.engine.Engine - INFO - [cached since 600s ago] ('FR:desktop', 1755387598, 1)
+2025-08-20 01:39:58,066 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-08-20 01:39:58,066 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 01:39:58,068 - sqlalchemy.engine.Engine - INFO - 
+                SELECT COALESCE(AVG(CASE WHEN risk >= ? THEN 1.0 ELSE 0.0 END), 0.0)
+                FROM clicks 
+                WHERE ts >= ? AND segment_id = ?
+            
+2025-08-20 01:39:58,068 - sqlalchemy.engine.Engine - INFO - [cached since 600s ago] (0.8, 1755387598, 'FR:desktop')
+2025-08-20 01:39:58,069 - __main__ - INFO - Setting payout for FR:desktop: 5.0
+2025-08-20 01:39:58,069 - sqlalchemy.engine.Engine - INFO - SELECT payout_rates.segment_id AS payout_rates_segment_id, payout_rates.payout AS payout_rates_payout, payout_rates.updated_at AS payout_rates_updated_at 
+FROM payout_rates 
+WHERE payout_rates.segment_id = ?
+ LIMIT ? OFFSET ?
+2025-08-20 01:39:58,069 - sqlalchemy.engine.Engine - INFO - [cached since 600s ago] ('FR:desktop', 1, 0)
+2025-08-20 01:39:58,073 - sqlalchemy.engine.Engine - INFO - UPDATE payout_rates SET updated_at=? WHERE payout_rates.segment_id = ?
+2025-08-20 01:39:58,074 - sqlalchemy.engine.Engine - INFO - [cached since 600s ago] (1755646798, 'FR:desktop')
+2025-08-20 01:39:58,074 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 01:39:58,081 - __main__ - INFO - Processing segment: FR:mobile
+2025-08-20 01:39:58,081 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 01:39:58,084 - sqlalchemy.engine.Engine - INFO - SELECT coalesce(sum(conversions.revenue), ?) AS total_revenue 
+FROM conversions JOIN clicks ON clicks.click_id = conversions.click_id 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND conversions.status = ?
+2025-08-20 01:39:58,084 - sqlalchemy.engine.Engine - INFO - [cached since 600.1s ago] (0.0, 'FR:mobile', 1755387598, 'approved')
+2025-08-20 01:39:58,087 - sqlalchemy.engine.Engine - INFO - SELECT count(*) AS count_1 
+FROM (SELECT clicks.click_id AS clicks_click_id, clicks.ts AS clicks_ts, clicks.creator_id AS clicks_creator_id, clicks.slug AS clicks_slug, clicks.segment_id AS clicks_segment_id, clicks.geo AS clicks_geo, clicks.device AS clicks_device, clicks.fp AS clicks_fp, clicks.valid_final AS clicks_valid_final, clicks.risk AS clicks_risk, clicks.offer_id AS clicks_offer_id 
+FROM clicks 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND clicks.valid_final = ?) AS anon_1
+2025-08-20 01:39:58,087 - sqlalchemy.engine.Engine - INFO - [cached since 600s ago] ('FR:mobile', 1755387598, 1)
+2025-08-20 01:39:58,087 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-08-20 01:39:58,087 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 01:39:58,087 - sqlalchemy.engine.Engine - INFO - 
+                SELECT COALESCE(AVG(CASE WHEN risk >= ? THEN 1.0 ELSE 0.0 END), 0.0)
+                FROM clicks 
+                WHERE ts >= ? AND segment_id = ?
+            
+2025-08-20 01:39:58,087 - sqlalchemy.engine.Engine - INFO - [cached since 600s ago] (0.8, 1755387598, 'FR:mobile')
+2025-08-20 01:39:58,094 - __main__ - INFO - Setting payout for FR:mobile: 5.0
+2025-08-20 01:39:58,094 - sqlalchemy.engine.Engine - INFO - SELECT payout_rates.segment_id AS payout_rates_segment_id, payout_rates.payout AS payout_rates_payout, payout_rates.updated_at AS payout_rates_updated_at 
+FROM payout_rates 
+WHERE payout_rates.segment_id = ?
+ LIMIT ? OFFSET ?
+2025-08-20 01:39:58,094 - sqlalchemy.engine.Engine - INFO - [cached since 600s ago] ('FR:mobile', 1, 0)
+2025-08-20 01:39:58,094 - sqlalchemy.engine.Engine - INFO - UPDATE payout_rates SET updated_at=? WHERE payout_rates.segment_id = ?
+2025-08-20 01:39:58,094 - sqlalchemy.engine.Engine - INFO - [cached since 600s ago] (1755646798, 'FR:mobile')
+2025-08-20 01:39:58,099 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 01:39:58,102 - __main__ - INFO - DB session closed
+2025-08-20 01:39:58,102 - __main__ - INFO - Payout rates updated @ 2025-08-20 01:39:58 (took 0.08s)
+2025-08-20 01:49:58,026 - __main__ - INFO - Starting autopilot iteration
+2025-08-20 01:49:58,026 - __main__ - INFO - Fetching all segments
+2025-08-20 01:49:58,032 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 01:49:58,037 - sqlalchemy.engine.Engine - INFO - SELECT segment_id FROM segments
+2025-08-20 01:49:58,040 - sqlalchemy.engine.Engine - INFO - [cached since 1200s ago] ()
+2025-08-20 01:49:58,040 - __main__ - INFO - Processing segment: FR:desktop
+2025-08-20 01:49:58,040 - sqlalchemy.engine.Engine - INFO - SELECT coalesce(sum(conversions.revenue), ?) AS total_revenue 
+FROM conversions JOIN clicks ON clicks.click_id = conversions.click_id 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND conversions.status = ?
+2025-08-20 01:49:58,050 - sqlalchemy.engine.Engine - INFO - [cached since 1200s ago] (0.0, 'FR:desktop', 1755388198, 'approved')
+2025-08-20 01:49:58,057 - sqlalchemy.engine.Engine - INFO - SELECT count(*) AS count_1 
+FROM (SELECT clicks.click_id AS clicks_click_id, clicks.ts AS clicks_ts, clicks.creator_id AS clicks_creator_id, clicks.slug AS clicks_slug, clicks.segment_id AS clicks_segment_id, clicks.geo AS clicks_geo, clicks.device AS clicks_device, clicks.fp AS clicks_fp, clicks.valid_final AS clicks_valid_final, clicks.risk AS clicks_risk, clicks.offer_id AS clicks_offer_id 
+FROM clicks 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND clicks.valid_final = ?) AS anon_1
+2025-08-20 01:49:58,058 - sqlalchemy.engine.Engine - INFO - [cached since 1200s ago] ('FR:desktop', 1755388198, 1)
+2025-08-20 01:49:58,060 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-08-20 01:49:58,062 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 01:49:58,062 - sqlalchemy.engine.Engine - INFO - 
+                SELECT COALESCE(AVG(CASE WHEN risk >= ? THEN 1.0 ELSE 0.0 END), 0.0)
+                FROM clicks 
+                WHERE ts >= ? AND segment_id = ?
+            
+2025-08-20 01:49:58,064 - sqlalchemy.engine.Engine - INFO - [cached since 1200s ago] (0.8, 1755388198, 'FR:desktop')
+2025-08-20 01:49:58,066 - __main__ - INFO - Setting payout for FR:desktop: 5.0
+2025-08-20 01:49:58,069 - sqlalchemy.engine.Engine - INFO - SELECT payout_rates.segment_id AS payout_rates_segment_id, payout_rates.payout AS payout_rates_payout, payout_rates.updated_at AS payout_rates_updated_at 
+FROM payout_rates 
+WHERE payout_rates.segment_id = ?
+ LIMIT ? OFFSET ?
+2025-08-20 01:49:58,070 - sqlalchemy.engine.Engine - INFO - [cached since 1200s ago] ('FR:desktop', 1, 0)
+2025-08-20 01:49:58,070 - sqlalchemy.engine.Engine - INFO - UPDATE payout_rates SET updated_at=? WHERE payout_rates.segment_id = ?
+2025-08-20 01:49:58,070 - sqlalchemy.engine.Engine - INFO - [cached since 1200s ago] (1755647398, 'FR:desktop')
+2025-08-20 01:49:58,073 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 01:49:58,074 - __main__ - INFO - Processing segment: FR:mobile
+2025-08-20 01:49:58,082 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 01:49:58,082 - sqlalchemy.engine.Engine - INFO - SELECT coalesce(sum(conversions.revenue), ?) AS total_revenue 
+FROM conversions JOIN clicks ON clicks.click_id = conversions.click_id 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND conversions.status = ?
+2025-08-20 01:49:58,084 - sqlalchemy.engine.Engine - INFO - [cached since 1200s ago] (0.0, 'FR:mobile', 1755388198, 'approved')
+2025-08-20 01:49:58,088 - sqlalchemy.engine.Engine - INFO - SELECT count(*) AS count_1 
+FROM (SELECT clicks.click_id AS clicks_click_id, clicks.ts AS clicks_ts, clicks.creator_id AS clicks_creator_id, clicks.slug AS clicks_slug, clicks.segment_id AS clicks_segment_id, clicks.geo AS clicks_geo, clicks.device AS clicks_device, clicks.fp AS clicks_fp, clicks.valid_final AS clicks_valid_final, clicks.risk AS clicks_risk, clicks.offer_id AS clicks_offer_id 
+FROM clicks 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND clicks.valid_final = ?) AS anon_1
+2025-08-20 01:49:58,089 - sqlalchemy.engine.Engine - INFO - [cached since 1200s ago] ('FR:mobile', 1755388198, 1)
+2025-08-20 01:49:58,091 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-08-20 01:49:58,092 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 01:49:58,093 - sqlalchemy.engine.Engine - INFO - 
+                SELECT COALESCE(AVG(CASE WHEN risk >= ? THEN 1.0 ELSE 0.0 END), 0.0)
+                FROM clicks 
+                WHERE ts >= ? AND segment_id = ?
+            
+2025-08-20 01:49:58,094 - sqlalchemy.engine.Engine - INFO - [cached since 1200s ago] (0.8, 1755388198, 'FR:mobile')
+2025-08-20 01:49:58,096 - __main__ - INFO - Setting payout for FR:mobile: 5.0
+2025-08-20 01:49:58,098 - sqlalchemy.engine.Engine - INFO - SELECT payout_rates.segment_id AS payout_rates_segment_id, payout_rates.payout AS payout_rates_payout, payout_rates.updated_at AS payout_rates_updated_at 
+FROM payout_rates 
+WHERE payout_rates.segment_id = ?
+ LIMIT ? OFFSET ?
+2025-08-20 01:49:58,099 - sqlalchemy.engine.Engine - INFO - [cached since 1200s ago] ('FR:mobile', 1, 0)
+2025-08-20 01:49:58,101 - sqlalchemy.engine.Engine - INFO - UPDATE payout_rates SET updated_at=? WHERE payout_rates.segment_id = ?
+2025-08-20 01:49:58,104 - sqlalchemy.engine.Engine - INFO - [cached since 1200s ago] (1755647398, 'FR:mobile')
+2025-08-20 01:49:58,105 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 01:49:58,106 - __main__ - INFO - DB session closed
+2025-08-20 01:49:58,109 - __main__ - INFO - Payout rates updated @ 2025-08-20 01:49:58 (took 0.08s)
+2025-08-20 01:59:58,027 - __main__ - INFO - Starting autopilot iteration
+2025-08-20 01:59:58,094 - __main__ - INFO - Fetching all segments
+2025-08-20 01:59:58,110 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 01:59:58,164 - sqlalchemy.engine.Engine - INFO - SELECT segment_id FROM segments
+2025-08-20 01:59:58,217 - sqlalchemy.engine.Engine - INFO - [cached since 1800s ago] ()
+2025-08-20 01:59:58,298 - __main__ - INFO - Processing segment: FR:desktop
+2025-08-20 01:59:58,322 - sqlalchemy.engine.Engine - INFO - SELECT coalesce(sum(conversions.revenue), ?) AS total_revenue 
+FROM conversions JOIN clicks ON clicks.click_id = conversions.click_id 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND conversions.status = ?
+2025-08-20 01:59:58,491 - sqlalchemy.engine.Engine - INFO - [cached since 1800s ago] (0.0, 'FR:desktop', 1755388798, 'approved')
+2025-08-20 01:59:58,989 - sqlalchemy.engine.Engine - INFO - SELECT count(*) AS count_1 
+FROM (SELECT clicks.click_id AS clicks_click_id, clicks.ts AS clicks_ts, clicks.creator_id AS clicks_creator_id, clicks.slug AS clicks_slug, clicks.segment_id AS clicks_segment_id, clicks.geo AS clicks_geo, clicks.device AS clicks_device, clicks.fp AS clicks_fp, clicks.valid_final AS clicks_valid_final, clicks.risk AS clicks_risk, clicks.offer_id AS clicks_offer_id 
+FROM clicks 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND clicks.valid_final = ?) AS anon_1
+2025-08-20 01:59:59,326 - sqlalchemy.engine.Engine - INFO - [cached since 1801s ago] ('FR:desktop', 1755388798, 1)
+2025-08-20 01:59:59,424 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-08-20 01:59:59,442 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 01:59:59,492 - sqlalchemy.engine.Engine - INFO - 
+                SELECT COALESCE(AVG(CASE WHEN risk >= ? THEN 1.0 ELSE 0.0 END), 0.0)
+                FROM clicks 
+                WHERE ts >= ? AND segment_id = ?
+            
+2025-08-20 01:59:59,493 - sqlalchemy.engine.Engine - INFO - [cached since 1801s ago] (0.8, 1755388799, 'FR:desktop')
+2025-08-20 01:59:59,525 - __main__ - INFO - Setting payout for FR:desktop: 5.0
+2025-08-20 01:59:59,531 - sqlalchemy.engine.Engine - INFO - SELECT payout_rates.segment_id AS payout_rates_segment_id, payout_rates.payout AS payout_rates_payout, payout_rates.updated_at AS payout_rates_updated_at 
+FROM payout_rates 
+WHERE payout_rates.segment_id = ?
+ LIMIT ? OFFSET ?
+2025-08-20 01:59:59,534 - sqlalchemy.engine.Engine - INFO - [cached since 1801s ago] ('FR:desktop', 1, 0)
+2025-08-20 01:59:59,537 - sqlalchemy.engine.Engine - INFO - UPDATE payout_rates SET updated_at=? WHERE payout_rates.segment_id = ?
+2025-08-20 01:59:59,539 - sqlalchemy.engine.Engine - INFO - [cached since 1801s ago] (1755647999, 'FR:desktop')
+2025-08-20 01:59:59,540 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 01:59:59,548 - __main__ - INFO - Processing segment: FR:mobile
+2025-08-20 01:59:59,552 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 01:59:59,554 - sqlalchemy.engine.Engine - INFO - SELECT coalesce(sum(conversions.revenue), ?) AS total_revenue 
+FROM conversions JOIN clicks ON clicks.click_id = conversions.click_id 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND conversions.status = ?
+2025-08-20 01:59:59,555 - sqlalchemy.engine.Engine - INFO - [cached since 1802s ago] (0.0, 'FR:mobile', 1755388799, 'approved')
+2025-08-20 01:59:59,557 - sqlalchemy.engine.Engine - INFO - SELECT count(*) AS count_1 
+FROM (SELECT clicks.click_id AS clicks_click_id, clicks.ts AS clicks_ts, clicks.creator_id AS clicks_creator_id, clicks.slug AS clicks_slug, clicks.segment_id AS clicks_segment_id, clicks.geo AS clicks_geo, clicks.device AS clicks_device, clicks.fp AS clicks_fp, clicks.valid_final AS clicks_valid_final, clicks.risk AS clicks_risk, clicks.offer_id AS clicks_offer_id 
+FROM clicks 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND clicks.valid_final = ?) AS anon_1
+2025-08-20 01:59:59,559 - sqlalchemy.engine.Engine - INFO - [cached since 1802s ago] ('FR:mobile', 1755388799, 1)
+2025-08-20 01:59:59,563 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-08-20 01:59:59,567 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 01:59:59,569 - sqlalchemy.engine.Engine - INFO - 
+                SELECT COALESCE(AVG(CASE WHEN risk >= ? THEN 1.0 ELSE 0.0 END), 0.0)
+                FROM clicks 
+                WHERE ts >= ? AND segment_id = ?
+            
+2025-08-20 01:59:59,570 - sqlalchemy.engine.Engine - INFO - [cached since 1802s ago] (0.8, 1755388799, 'FR:mobile')
+2025-08-20 01:59:59,572 - __main__ - INFO - Setting payout for FR:mobile: 5.0
+2025-08-20 01:59:59,574 - sqlalchemy.engine.Engine - INFO - SELECT payout_rates.segment_id AS payout_rates_segment_id, payout_rates.payout AS payout_rates_payout, payout_rates.updated_at AS payout_rates_updated_at 
+FROM payout_rates 
+WHERE payout_rates.segment_id = ?
+ LIMIT ? OFFSET ?
+2025-08-20 01:59:59,575 - sqlalchemy.engine.Engine - INFO - [cached since 1802s ago] ('FR:mobile', 1, 0)
+2025-08-20 01:59:59,577 - sqlalchemy.engine.Engine - INFO - UPDATE payout_rates SET updated_at=? WHERE payout_rates.segment_id = ?
+2025-08-20 01:59:59,579 - sqlalchemy.engine.Engine - INFO - [cached since 1802s ago] (1755647999, 'FR:mobile')
+2025-08-20 01:59:59,585 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 01:59:59,588 - __main__ - INFO - DB session closed
+2025-08-20 01:59:59,588 - __main__ - INFO - Payout rates updated @ 2025-08-20 01:59:59 (took 1.56s)
+2025-08-20 02:09:58,028 - __main__ - INFO - Starting autopilot iteration
+2025-08-20 02:09:58,031 - __main__ - INFO - Fetching all segments
+2025-08-20 02:09:58,039 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 02:09:58,044 - sqlalchemy.engine.Engine - INFO - SELECT segment_id FROM segments
+2025-08-20 02:09:58,047 - sqlalchemy.engine.Engine - INFO - [cached since 2400s ago] ()
+2025-08-20 02:09:58,051 - __main__ - INFO - Processing segment: FR:desktop
+2025-08-20 02:09:58,054 - sqlalchemy.engine.Engine - INFO - SELECT coalesce(sum(conversions.revenue), ?) AS total_revenue 
+FROM conversions JOIN clicks ON clicks.click_id = conversions.click_id 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND conversions.status = ?
+2025-08-20 02:09:58,056 - sqlalchemy.engine.Engine - INFO - [cached since 2400s ago] (0.0, 'FR:desktop', 1755389398, 'approved')
+2025-08-20 02:09:58,060 - sqlalchemy.engine.Engine - INFO - SELECT count(*) AS count_1 
+FROM (SELECT clicks.click_id AS clicks_click_id, clicks.ts AS clicks_ts, clicks.creator_id AS clicks_creator_id, clicks.slug AS clicks_slug, clicks.segment_id AS clicks_segment_id, clicks.geo AS clicks_geo, clicks.device AS clicks_device, clicks.fp AS clicks_fp, clicks.valid_final AS clicks_valid_final, clicks.risk AS clicks_risk, clicks.offer_id AS clicks_offer_id 
+FROM clicks 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND clicks.valid_final = ?) AS anon_1
+2025-08-20 02:09:58,060 - sqlalchemy.engine.Engine - INFO - [cached since 2400s ago] ('FR:desktop', 1755389398, 1)
+2025-08-20 02:09:58,064 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-08-20 02:09:58,065 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 02:09:58,066 - sqlalchemy.engine.Engine - INFO - 
+                SELECT COALESCE(AVG(CASE WHEN risk >= ? THEN 1.0 ELSE 0.0 END), 0.0)
+                FROM clicks 
+                WHERE ts >= ? AND segment_id = ?
+            
+2025-08-20 02:09:58,067 - sqlalchemy.engine.Engine - INFO - [cached since 2400s ago] (0.8, 1755389398, 'FR:desktop')
+2025-08-20 02:09:58,070 - __main__ - INFO - Setting payout for FR:desktop: 5.0
+2025-08-20 02:09:58,071 - sqlalchemy.engine.Engine - INFO - SELECT payout_rates.segment_id AS payout_rates_segment_id, payout_rates.payout AS payout_rates_payout, payout_rates.updated_at AS payout_rates_updated_at 
+FROM payout_rates 
+WHERE payout_rates.segment_id = ?
+ LIMIT ? OFFSET ?
+2025-08-20 02:09:58,072 - sqlalchemy.engine.Engine - INFO - [cached since 2400s ago] ('FR:desktop', 1, 0)
+2025-08-20 02:09:58,072 - sqlalchemy.engine.Engine - INFO - UPDATE payout_rates SET updated_at=? WHERE payout_rates.segment_id = ?
+2025-08-20 02:09:58,075 - sqlalchemy.engine.Engine - INFO - [cached since 2400s ago] (1755648598, 'FR:desktop')
+2025-08-20 02:09:58,076 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 02:09:58,083 - __main__ - INFO - Processing segment: FR:mobile
+2025-08-20 02:09:58,083 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 02:09:58,085 - sqlalchemy.engine.Engine - INFO - SELECT coalesce(sum(conversions.revenue), ?) AS total_revenue 
+FROM conversions JOIN clicks ON clicks.click_id = conversions.click_id 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND conversions.status = ?
+2025-08-20 02:09:58,085 - sqlalchemy.engine.Engine - INFO - [cached since 2400s ago] (0.0, 'FR:mobile', 1755389398, 'approved')
+2025-08-20 02:09:58,087 - sqlalchemy.engine.Engine - INFO - SELECT count(*) AS count_1 
+FROM (SELECT clicks.click_id AS clicks_click_id, clicks.ts AS clicks_ts, clicks.creator_id AS clicks_creator_id, clicks.slug AS clicks_slug, clicks.segment_id AS clicks_segment_id, clicks.geo AS clicks_geo, clicks.device AS clicks_device, clicks.fp AS clicks_fp, clicks.valid_final AS clicks_valid_final, clicks.risk AS clicks_risk, clicks.offer_id AS clicks_offer_id 
+FROM clicks 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND clicks.valid_final = ?) AS anon_1
+2025-08-20 02:09:58,089 - sqlalchemy.engine.Engine - INFO - [cached since 2400s ago] ('FR:mobile', 1755389398, 1)
+2025-08-20 02:09:58,091 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-08-20 02:09:58,092 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 02:09:58,093 - sqlalchemy.engine.Engine - INFO - 
+                SELECT COALESCE(AVG(CASE WHEN risk >= ? THEN 1.0 ELSE 0.0 END), 0.0)
+                FROM clicks 
+                WHERE ts >= ? AND segment_id = ?
+            
+2025-08-20 02:09:58,094 - sqlalchemy.engine.Engine - INFO - [cached since 2400s ago] (0.8, 1755389398, 'FR:mobile')
+2025-08-20 02:09:58,095 - __main__ - INFO - Setting payout for FR:mobile: 5.0
+2025-08-20 02:09:58,096 - sqlalchemy.engine.Engine - INFO - SELECT payout_rates.segment_id AS payout_rates_segment_id, payout_rates.payout AS payout_rates_payout, payout_rates.updated_at AS payout_rates_updated_at 
+FROM payout_rates 
+WHERE payout_rates.segment_id = ?
+ LIMIT ? OFFSET ?
+2025-08-20 02:09:58,097 - sqlalchemy.engine.Engine - INFO - [cached since 2400s ago] ('FR:mobile', 1, 0)
+2025-08-20 02:09:58,098 - sqlalchemy.engine.Engine - INFO - UPDATE payout_rates SET updated_at=? WHERE payout_rates.segment_id = ?
+2025-08-20 02:09:58,099 - sqlalchemy.engine.Engine - INFO - [cached since 2400s ago] (1755648598, 'FR:mobile')
+2025-08-20 02:09:58,100 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 02:09:58,103 - __main__ - INFO - DB session closed
+2025-08-20 02:09:58,103 - __main__ - INFO - Payout rates updated @ 2025-08-20 02:09:58 (took 0.08s)
+2025-08-20 02:19:58,028 - __main__ - INFO - Starting autopilot iteration
+2025-08-20 02:19:58,041 - __main__ - INFO - Fetching all segments
+2025-08-20 02:19:58,180 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 02:19:58,212 - sqlalchemy.engine.Engine - INFO - SELECT segment_id FROM segments
+2025-08-20 02:19:58,214 - sqlalchemy.engine.Engine - INFO - [cached since 3000s ago] ()
+2025-08-20 02:19:58,236 - __main__ - INFO - Processing segment: FR:desktop
+2025-08-20 02:19:58,254 - sqlalchemy.engine.Engine - INFO - SELECT coalesce(sum(conversions.revenue), ?) AS total_revenue 
+FROM conversions JOIN clicks ON clicks.click_id = conversions.click_id 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND conversions.status = ?
+2025-08-20 02:19:58,276 - sqlalchemy.engine.Engine - INFO - [cached since 3000s ago] (0.0, 'FR:desktop', 1755389998, 'approved')
+2025-08-20 02:19:58,280 - sqlalchemy.engine.Engine - INFO - SELECT count(*) AS count_1 
+FROM (SELECT clicks.click_id AS clicks_click_id, clicks.ts AS clicks_ts, clicks.creator_id AS clicks_creator_id, clicks.slug AS clicks_slug, clicks.segment_id AS clicks_segment_id, clicks.geo AS clicks_geo, clicks.device AS clicks_device, clicks.fp AS clicks_fp, clicks.valid_final AS clicks_valid_final, clicks.risk AS clicks_risk, clicks.offer_id AS clicks_offer_id 
+FROM clicks 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND clicks.valid_final = ?) AS anon_1
+2025-08-20 02:19:58,286 - sqlalchemy.engine.Engine - INFO - [cached since 3000s ago] ('FR:desktop', 1755389998, 1)
+2025-08-20 02:19:58,293 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-08-20 02:19:58,324 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 02:19:58,327 - sqlalchemy.engine.Engine - INFO - 
+                SELECT COALESCE(AVG(CASE WHEN risk >= ? THEN 1.0 ELSE 0.0 END), 0.0)
+                FROM clicks 
+                WHERE ts >= ? AND segment_id = ?
+            
+2025-08-20 02:19:58,346 - sqlalchemy.engine.Engine - INFO - [cached since 3000s ago] (0.8, 1755389998, 'FR:desktop')
+2025-08-20 02:19:58,352 - __main__ - INFO - Setting payout for FR:desktop: 5.0
+2025-08-20 02:19:58,368 - sqlalchemy.engine.Engine - INFO - SELECT payout_rates.segment_id AS payout_rates_segment_id, payout_rates.payout AS payout_rates_payout, payout_rates.updated_at AS payout_rates_updated_at 
+FROM payout_rates 
+WHERE payout_rates.segment_id = ?
+ LIMIT ? OFFSET ?
+2025-08-20 02:19:58,378 - sqlalchemy.engine.Engine - INFO - [cached since 3000s ago] ('FR:desktop', 1, 0)
+2025-08-20 02:19:58,394 - sqlalchemy.engine.Engine - INFO - UPDATE payout_rates SET updated_at=? WHERE payout_rates.segment_id = ?
+2025-08-20 02:19:58,402 - sqlalchemy.engine.Engine - INFO - [cached since 3000s ago] (1755649198, 'FR:desktop')
+2025-08-20 02:19:58,415 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 02:19:58,493 - __main__ - INFO - Processing segment: FR:mobile
+2025-08-20 02:19:58,496 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 02:19:58,499 - sqlalchemy.engine.Engine - INFO - SELECT coalesce(sum(conversions.revenue), ?) AS total_revenue 
+FROM conversions JOIN clicks ON clicks.click_id = conversions.click_id 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND conversions.status = ?
+2025-08-20 02:19:58,506 - sqlalchemy.engine.Engine - INFO - [cached since 3000s ago] (0.0, 'FR:mobile', 1755389998, 'approved')
+2025-08-20 02:19:58,512 - sqlalchemy.engine.Engine - INFO - SELECT count(*) AS count_1 
+FROM (SELECT clicks.click_id AS clicks_click_id, clicks.ts AS clicks_ts, clicks.creator_id AS clicks_creator_id, clicks.slug AS clicks_slug, clicks.segment_id AS clicks_segment_id, clicks.geo AS clicks_geo, clicks.device AS clicks_device, clicks.fp AS clicks_fp, clicks.valid_final AS clicks_valid_final, clicks.risk AS clicks_risk, clicks.offer_id AS clicks_offer_id 
+FROM clicks 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND clicks.valid_final = ?) AS anon_1
+2025-08-20 02:19:58,514 - sqlalchemy.engine.Engine - INFO - [cached since 3000s ago] ('FR:mobile', 1755389998, 1)
+2025-08-20 02:19:58,522 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-08-20 02:19:58,526 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 02:19:58,527 - sqlalchemy.engine.Engine - INFO - 
+                SELECT COALESCE(AVG(CASE WHEN risk >= ? THEN 1.0 ELSE 0.0 END), 0.0)
+                FROM clicks 
+                WHERE ts >= ? AND segment_id = ?
+            
+2025-08-20 02:19:58,528 - sqlalchemy.engine.Engine - INFO - [cached since 3000s ago] (0.8, 1755389998, 'FR:mobile')
+2025-08-20 02:19:58,530 - __main__ - INFO - Setting payout for FR:mobile: 5.0
+2025-08-20 02:19:58,541 - sqlalchemy.engine.Engine - INFO - SELECT payout_rates.segment_id AS payout_rates_segment_id, payout_rates.payout AS payout_rates_payout, payout_rates.updated_at AS payout_rates_updated_at 
+FROM payout_rates 
+WHERE payout_rates.segment_id = ?
+ LIMIT ? OFFSET ?
+2025-08-20 02:19:58,608 - sqlalchemy.engine.Engine - INFO - [cached since 3001s ago] ('FR:mobile', 1, 0)
+2025-08-20 02:19:58,626 - sqlalchemy.engine.Engine - INFO - UPDATE payout_rates SET updated_at=? WHERE payout_rates.segment_id = ?
+2025-08-20 02:19:58,670 - sqlalchemy.engine.Engine - INFO - [cached since 3001s ago] (1755649198, 'FR:mobile')
+2025-08-20 02:19:58,755 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 02:19:58,843 - __main__ - INFO - DB session closed
+2025-08-20 02:19:58,906 - __main__ - INFO - Payout rates updated @ 2025-08-20 02:19:58 (took 0.88s)
+2025-08-20 02:23:57,594 - __main__ - INFO - Starting SmartLinks Autopilot
+2025-08-20 02:23:57,594 - __main__ - INFO - Initializing database...
+2025-08-20 02:23:57,600 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 02:23:57,607 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("offers")
+2025-08-20 02:23:57,608 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 02:23:57,612 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("segments")
+2025-08-20 02:23:57,615 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 02:23:57,615 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("creators")
+2025-08-20 02:23:57,615 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 02:23:57,618 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("clicks")
+2025-08-20 02:23:57,619 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 02:23:57,627 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("conversions")
+2025-08-20 02:23:57,629 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 02:23:57,629 - sqlalchemy.engine.Engine - INFO - PRAGMA main.table_info("payout_rates")
+2025-08-20 02:23:57,632 - sqlalchemy.engine.Engine - INFO - [raw sql] ()
+2025-08-20 02:23:57,635 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 02:23:57,641 - src.soft.storage - INFO - Database tables created successfully
+2025-08-20 02:23:57,642 - __main__ - INFO - Ensuring default segments exist
+2025-08-20 02:23:57,731 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 02:23:57,740 - sqlalchemy.engine.Engine - INFO - SELECT segments.segment_id AS segments_segment_id, segments.geo AS segments_geo, segments.device AS segments_device 
+FROM segments 
+WHERE segments.segment_id = ?
+ LIMIT ? OFFSET ?
+2025-08-20 02:23:57,740 - sqlalchemy.engine.Engine - INFO - [generated in 0.00170s] ('FR:mobile', 1, 0)
+2025-08-20 02:23:57,740 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 02:23:57,750 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 02:23:57,750 - sqlalchemy.engine.Engine - INFO - SELECT segments.segment_id AS segments_segment_id, segments.geo AS segments_geo, segments.device AS segments_device 
+FROM segments 
+WHERE segments.segment_id = ?
+ LIMIT ? OFFSET ?
+2025-08-20 02:23:57,750 - sqlalchemy.engine.Engine - INFO - [cached since 0.01251s ago] ('FR:desktop', 1, 0)
+2025-08-20 02:23:57,756 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 02:23:57,756 - __main__ - INFO - Default segments ensured
+2025-08-20 02:23:57,756 - __main__ - INFO - Starting autopilot with interval: 600 seconds
+2025-08-20 02:23:57,756 - __main__ - INFO - Starting autopilot iteration
+2025-08-20 02:23:57,756 - __main__ - INFO - Fetching all segments
+2025-08-20 02:23:57,760 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 02:23:57,762 - sqlalchemy.engine.Engine - INFO - SELECT segment_id FROM segments
+2025-08-20 02:23:57,764 - sqlalchemy.engine.Engine - INFO - [generated in 0.00211s] ()
+2025-08-20 02:23:57,766 - __main__ - INFO - Processing segment: FR:desktop
+2025-08-20 02:23:57,773 - sqlalchemy.engine.Engine - INFO - SELECT coalesce(sum(conversions.revenue), ?) AS total_revenue 
+FROM conversions JOIN clicks ON clicks.click_id = conversions.click_id 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND conversions.status = ?
+2025-08-20 02:23:57,774 - sqlalchemy.engine.Engine - INFO - [generated in 0.00118s] (0.0, 'FR:desktop', 1755390237, 'approved')
+2025-08-20 02:23:57,784 - sqlalchemy.engine.Engine - INFO - SELECT count(*) AS count_1 
+FROM (SELECT clicks.click_id AS clicks_click_id, clicks.ts AS clicks_ts, clicks.creator_id AS clicks_creator_id, clicks.slug AS clicks_slug, clicks.segment_id AS clicks_segment_id, clicks.geo AS clicks_geo, clicks.device AS clicks_device, clicks.fp AS clicks_fp, clicks.valid_final AS clicks_valid_final, clicks.risk AS clicks_risk, clicks.offer_id AS clicks_offer_id 
+FROM clicks 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND clicks.valid_final = ?) AS anon_1
+2025-08-20 02:23:57,788 - sqlalchemy.engine.Engine - INFO - [generated in 0.00474s] ('FR:desktop', 1755390237, 1)
+2025-08-20 02:23:57,791 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-08-20 02:23:57,791 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 02:23:57,796 - sqlalchemy.engine.Engine - INFO - 
+                SELECT COALESCE(AVG(CASE WHEN risk >= ? THEN 1.0 ELSE 0.0 END), 0.0)
+                FROM clicks 
+                WHERE ts >= ? AND segment_id = ?
+            
+2025-08-20 02:23:57,799 - sqlalchemy.engine.Engine - INFO - [generated in 0.00122s] (0.8, 1755390237, 'FR:desktop')
+2025-08-20 02:23:57,800 - __main__ - INFO - Setting payout for FR:desktop: 5.0
+2025-08-20 02:23:57,807 - sqlalchemy.engine.Engine - INFO - SELECT payout_rates.segment_id AS payout_rates_segment_id, payout_rates.payout AS payout_rates_payout, payout_rates.updated_at AS payout_rates_updated_at 
+FROM payout_rates 
+WHERE payout_rates.segment_id = ?
+ LIMIT ? OFFSET ?
+2025-08-20 02:23:57,807 - sqlalchemy.engine.Engine - INFO - [generated in 0.00089s] ('FR:desktop', 1, 0)
+2025-08-20 02:23:57,812 - sqlalchemy.engine.Engine - INFO - UPDATE payout_rates SET updated_at=? WHERE payout_rates.segment_id = ?
+2025-08-20 02:23:57,813 - sqlalchemy.engine.Engine - INFO - [generated in 0.00151s] (1755649437, 'FR:desktop')
+2025-08-20 02:23:57,816 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 02:23:57,819 - __main__ - INFO - Processing segment: FR:mobile
+2025-08-20 02:23:57,824 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 02:23:57,827 - sqlalchemy.engine.Engine - INFO - SELECT coalesce(sum(conversions.revenue), ?) AS total_revenue 
+FROM conversions JOIN clicks ON clicks.click_id = conversions.click_id 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND conversions.status = ?
+2025-08-20 02:23:57,827 - sqlalchemy.engine.Engine - INFO - [cached since 0.05548s ago] (0.0, 'FR:mobile', 1755390237, 'approved')
+2025-08-20 02:23:57,831 - sqlalchemy.engine.Engine - INFO - SELECT count(*) AS count_1 
+FROM (SELECT clicks.click_id AS clicks_click_id, clicks.ts AS clicks_ts, clicks.creator_id AS clicks_creator_id, clicks.slug AS clicks_slug, clicks.segment_id AS clicks_segment_id, clicks.geo AS clicks_geo, clicks.device AS clicks_device, clicks.fp AS clicks_fp, clicks.valid_final AS clicks_valid_final, clicks.risk AS clicks_risk, clicks.offer_id AS clicks_offer_id 
+FROM clicks 
+WHERE clicks.segment_id = ? AND clicks.ts >= ? AND clicks.valid_final = ?) AS anon_1
+2025-08-20 02:23:57,833 - sqlalchemy.engine.Engine - INFO - [cached since 0.04794s ago] ('FR:mobile', 1755390237, 1)
+2025-08-20 02:23:57,835 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2025-08-20 02:23:57,838 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2025-08-20 02:23:57,838 - sqlalchemy.engine.Engine - INFO - 
+                SELECT COALESCE(AVG(CASE WHEN risk >= ? THEN 1.0 ELSE 0.0 END), 0.0)
+                FROM clicks 
+                WHERE ts >= ? AND segment_id = ?
+            
+2025-08-20 02:23:57,838 - sqlalchemy.engine.Engine - INFO - [cached since 0.04301s ago] (0.8, 1755390237, 'FR:mobile')
+2025-08-20 02:23:57,838 - __main__ - INFO - Setting payout for FR:mobile: 5.0
+2025-08-20 02:23:57,844 - sqlalchemy.engine.Engine - INFO - SELECT payout_rates.segment_id AS payout_rates_segment_id, payout_rates.payout AS payout_rates_payout, payout_rates.updated_at AS payout_rates_updated_at 
+FROM payout_rates 
+WHERE payout_rates.segment_id = ?
+ LIMIT ? OFFSET ?
+2025-08-20 02:23:57,846 - sqlalchemy.engine.Engine - INFO - [cached since 0.03957s ago] ('FR:mobile', 1, 0)
+2025-08-20 02:23:57,846 - sqlalchemy.engine.Engine - INFO - UPDATE payout_rates SET updated_at=? WHERE payout_rates.segment_id = ?
+2025-08-20 02:23:57,849 - sqlalchemy.engine.Engine - INFO - [cached since 0.03742s ago] (1755649437, 'FR:mobile')
+2025-08-20 02:23:57,851 - sqlalchemy.engine.Engine - INFO - COMMIT
+2025-08-20 02:23:57,857 - __main__ - INFO - DB session closed
+2025-08-20 02:23:57,857 - __main__ - INFO - Payout rates updated @ 2025-08-20 02:23:57 (took 0.10s)

@@ -1,0 +1,30 @@
+version: "1"
+
+fraud:
+  threshold: 0.8
+  weights:
+    ip: 0.4
+    ua: 0.3
+    geo: 0.3
+
+bandit:
+  algo: "epsilon_greedy"
+  epsilon: 0.1
+  min_volume_segment: 50
+
+payout:
+  alpha: 0.9
+  buffer_eur: 100.0
+  min_eur: 5.0
+  max_eur: 1000.0
+
+risk:
+  k_sigma: 2.0
+  k_fraud: 1.5
+
+budget:
+  max_payout_day_global_eur: 5000.0
+  max_payout_day_creator_eur: 200.0
+
+hold:
+  base_days: 7

@@ -1,0 +1,22 @@
+{
+  "name": "smartlinks-autopilot",
+  "version": "1.0.0",
+  "description": "SmartLinks Dashboard with AI Supervisor",
+  "scripts": {
+    "seed": "python scripts/seed_database.py --days 30 --volume medium --force",
+    "seed:clean": "python scripts/seed_database.py --days 30 --volume medium --clean --force",
+    "seed:high": "python scripts/seed_database.py --days 30 --volume high --clean --force",
+    "seed:week": "python scripts/seed_database.py --days 7 --volume medium --clean --force",
+    "test:db": "python -c \"from src.soft.db import SessionLocal; from src.soft.models import Click; db = SessionLocal(); print(f'DB OK: {db.query(Click).count()} clics'); db.close()\"",
+    "start:backend": "python -m src.soft.router",
+    "start:all": "start_all.bat",
+    "check:env": "python check_env.py"
+  },
+  "dependencies": {
+    "react-hot-toast": "^2.6.0"
+  },
+  "devDependencies": {},
+  "keywords": ["smartlinks", "dashboard", "analytics", "ai-supervisor"],
+  "author": "SmartLinks Team",
+  "license": "MIT"
+}

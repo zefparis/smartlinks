@@ -1,0 +1,154 @@
+{
+  "migration_plan": {
+    "description": "SmartLinks Autopilot - Migration vers structure clean",
+    "timestamp": "2025-08-19T23:03:48+02:00",
+    "target_structure": "Ultra-maintenable, zéro code mort, logique business 100% conservée"
+  },
+  "files_to_delete": {
+    "duplicate_routers": [
+      "src/soft/services_router.py",
+      "src/soft/router_admin.py", 
+      "src/soft/api_router.py",
+      "src/soft/dg/api/router.py",
+      "src/soft/api/status_router.py",
+      "src/soft/api/config_router.py"
+    ],
+    "legacy_test_scripts": [
+      "test_*.py",
+      "debug_*.py",
+      "verify_*.py",
+      "check_*.py",
+      "fix_*.py",
+      "openai_*.py",
+      "minimal_test.py",
+      "direct_test.py",
+      "simple_test.py",
+      "quick_*.py",
+      "temp_generate.py"
+    ],
+    "windows_batch_files": [
+      "*.bat",
+      "*.ps1"
+    ],
+    "log_files": [
+      "*.log",
+      "cmd_debug.log",
+      "db_connection.log",
+      "db_connection_cmd.log",
+      "sqlalchemy_debug.log",
+      "server_startup.log"
+    ],
+    "startup_scripts_duplicates": [
+      "start_*.py",
+      "run_*.py",
+      "launch.py",
+      "setup.py"
+    ],
+    "database_temp_files": [
+      "*.db-shm",
+      "*.db-wal",
+      "db.sqlite3"
+    ],
+    "misc_temp_files": [
+      "start.txt",
+      "startup_log.txt",
+      "test_write.log"
+    ]
+  },
+  "files_to_keep": {
+    "core_business_logic": [
+      "src/soft/dg/ai/supervisor.py",
+      "src/soft/dg/ai/openai_factory.py",
+      "src/soft/dg/ai/openai_integration.py",
+      "src/soft/dg/algorithms/**/*.py",
+      "src/soft/dg/api/endpoints/ia_supervisor.py",
+      "src/soft/dg/core/**/*.py",
+      "src/soft/dg/models/**/*.py"
+    ],
+    "active_routers": [
+      "src/soft/router.py",
+      "src/soft/api/analytics_router.py",
+      "src/soft/api/settings_router.py",
+      "src/soft/api/ai_dg_router.py",
+      "src/soft/api/assistant_router.py",
+      "src/soft/api/clicks_router.py",
+      "src/soft/api/health_router.py"
+    ],
+    "database_models": [
+      "src/soft/models.py",
+      "src/soft/db.py",
+      "src/soft/config.py"
+    ],
+    "frontend": [
+      "src/frontend/**/*"
+    ],
+    "essential_scripts": [
+      "main.py",
+      "seed_data.py",
+      "generate_data.py",
+      "force_data_generation.py"
+    ],
+    "configuration": [
+      ".env",
+      ".env.example",
+      "requirements.txt",
+      "package.json",
+      "Makefile"
+    ],
+    "documentation": [
+      "README*.md",
+      "docs/**/*.md",
+      "STRUCTURE.md"
+    ],
+    "tests": [
+      "tests/**/*.py",
+      "conftest.py",
+      "pytest.ini"
+    ],
+    "database": [
+      "smartlinks.db",
+      "alembic.ini",
+      "migrations/**/*"
+    ]
+  },
+  "files_to_move": {
+    "consolidate_routers": {
+      "src/soft/api/analytics_schema_router.py": "merge_into:src/soft/api/analytics_router.py",
+      "src/soft/api/ai_discovery_router.py": "merge_into:src/soft/api/ai_dg_router.py"
+    }
+  },
+  "imports_to_fix": {
+    "router_consolidation": [
+      "src/soft/router.py - Remove duplicate router imports",
+      "src/soft/dg/api/endpoints/ia_supervisor.py - Update import paths after cleanup"
+    ],
+    "frontend_api_normalization": [
+      "src/frontend/src/lib/api.ts - Normalize response handling",
+      "src/frontend/src/pages/Analytics.tsx - Handle normalized arrays",
+      "src/frontend/src/pages/Settings.tsx - Fix Object.entries guards"
+    ]
+  },
+  "critical_fixes_required": {
+    "backend": [
+      "Fix /api/analytics/clicks/history endpoint (500 error)",
+      "Implement /api/analytics/traffic-by-segment endpoint", 
+      "Add CORS middleware configuration",
+      "Normalize analytics responses (devices/countries as arrays)"
+    ],
+    "frontend": [
+      "Add Vite proxy configuration for /api routes",
+      "Fix Analytics.tsx data handling",
+      "Fix Settings.tsx Object.entries and useForm issues"
+    ]
+  },
+  "validation_endpoints": [
+    "GET /api/analytics/health",
+    "GET /api/analytics/clicks/history?days=30",
+    "GET /api/analytics/devices", 
+    "GET /api/analytics/countries?days=30&limit=10",
+    "GET /api/analytics/traffic-by-segment?days=30",
+    "GET /api/ia/health",
+    "POST /api/ia/ask",
+    "POST /api/assistant/ask"
+  ]
+}
