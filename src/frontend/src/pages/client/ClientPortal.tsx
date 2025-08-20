@@ -44,12 +44,26 @@ interface PayoutMethod {
   status: 'active' | 'pending' | 'disabled';
 }
 
+interface RecentPayout {
+  id: string;
+  amount: number;
+  date: string;
+  status: string;
+  method: string;
+}
+
+interface EarningsHistory {
+  date: string;
+  earnings: number;
+  clicks: number;
+}
+
 export function ClientPortal() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [stats, setStats] = useState<ClientStats | null>(null);
   const [payoutMethods, setPayoutMethods] = useState<PayoutMethod[]>([]);
-  const [recentPayouts, setRecentPayouts] = useState([]);
-  const [earningsHistory, setEarningsHistory] = useState([]);
+  const [recentPayouts, setRecentPayouts] = useState<RecentPayout[]>([]);
+  const [earningsHistory, setEarningsHistory] = useState<EarningsHistory[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
