@@ -67,3 +67,24 @@ class AuditSettings(Base):
         Index('ix_audit_settings_algo_key', 'algo_key'),
         Index('ix_audit_settings_created_at', 'created_at'),
     )
+
+
+class AlgorithmRun(Base):
+    """Track algorithm execution runs with RCP governance information."""
+    __tablename__ = "algorithm_runs"
+    
+    id = Column(String(36), primary_key=True)
+    algo_key = Column(String(50), nullable=False)
+    status = Column(String(20), nullable=False)
+    started_at = Column(DateTime, nullable=False, server_default=func.now())
+    completed_at = Column(DateTime, nullable=True)
+    settings_version = Column(Integer, nullable=True)
+    ai_authority_used = Column(String(50), nullable=True)
+    risk_cost = Column(Integer, nullable=True)
+    rcp_applied = Column(Boolean, nullable=False, default=False)
+    error_message = Column(String, nullable=True)
+    
+    __table_args__ = (
+        Index('ix_algorithm_runs_algo_key', 'algo_key'),
+        Index('ix_algorithm_runs_started_at', 'started_at'),
+    )

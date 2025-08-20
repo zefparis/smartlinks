@@ -8,7 +8,7 @@ from typing import Dict, Any, Optional, List
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine, sessionmaker
 
-from .models import AlgorithmSettings, AIPolicy, AuditSettings, AuthorityLevel
+from .models import AlgorithmSettings, AIPolicy, AuditSettings, AuthorityLevel, AlgorithmRun
 from .schemas import ALGORITHM_SETTINGS_MAP
 from ..dg.dependencies import get_db
 from ..rcp.repository import RCPRepository
@@ -204,12 +204,25 @@ class AlgorithmRunner:
         run_id = str(uuid.uuid4())
         
         try:
+            # Create algorithm run record
+            await self._create_algorithm_run(run_id, algo_key)
+            
             # Load settings and policy
             settings = await self.load_algorithm_settings(algo_key)
             policy = await self.load_ai_policy(algo_key)
             
             # Check if algorithm is active
             if not settings.get("active", False):
+                await self._update_algorithm_run(
+                    run_id=run_id,
+                    algo_key=algo_key,
+                    settings_version=settings.get("version", 1),
+                    ai_authority_used=policy.get("authority_level", "advisory"),
+                    risk_cost=0.0,
+                    rcp_applied=False,
+                    status="inactive",
+                    error_message="Algorithm is disabled"
+                )
                 return {"status": "inactive", "message": "Algorithm is disabled"}
             
             # Generate algorithm actions (mock implementation)
@@ -367,23 +380,6 @@ class AlgorithmRunner:
             "device": "mobile",
             "source": "organic"
         }
-    
-    async def _update_algorithm_run(
-        self, 
-        run_id: str, 
-        algo_key: str, 
-        settings_version: int,
-        ai_authority_used: str,
-        risk_cost: float,
-        rcp_applied: bool
-    ):
-        """Update algorithm run record with RCP information."""
-        # This would update the algorithm_runs table
-        # For now, just log the information
-        logger.info(f"Algorithm run {run_id} completed: "
-                   f"algo={algo_key}, version={settings_version}, "
-                   f"authority={ai_authority_used}, risk={risk_cost:.3f}, "
-                   f"rcp_applied={rcp_applied}")
     
     async def _generate_algorithm_actions(self, algo_key: str, settings: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Generate algorithm actions based on settings (mock implementation)."""
