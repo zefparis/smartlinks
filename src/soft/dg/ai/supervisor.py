@@ -63,6 +63,10 @@ class AlgorithmRegistry:
             raise ValueError("Algorithm class must implement get_name() class method")
         
         name = algorithm_class.get_name()
+        # Avoid duplicate registrations
+        if name in self._algorithms:
+            logger.debug(f"Algorithm already registered: {name}, skipping")
+            return
         self._algorithms[name] = algorithm_class
         logger.info(f"Registered algorithm: {name}")
     

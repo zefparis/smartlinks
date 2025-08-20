@@ -140,10 +140,15 @@ class AIPolicy(BaseModel):
 class AlgorithmSettingsResponse(BaseModel):
     """Response for algorithm settings with metadata."""
     settings: Dict[str, Any]
-    schema: Dict[str, Any]
+    # Use an internal name to avoid shadowing BaseModel.schema()
+    schema_: Dict[str, Any] = Field(alias="schema")
     version: int
     updated_by: str
     updated_at: str
+
+    class Config:
+        # Allow creating the model with either field name or alias
+        allow_population_by_field_name = True
 
 
 class AuditEntry(BaseModel):
