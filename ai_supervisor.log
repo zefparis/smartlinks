@@ -1268,3 +1268,5 @@ WHERE payout_rates.segment_id = ?
 2025-08-20 02:23:57,851 - sqlalchemy.engine.Engine - INFO - COMMIT
 2025-08-20 02:23:57,857 - __main__ - INFO - DB session closed
 2025-08-20 02:23:57,857 - __main__ - INFO - Payout rates updated @ 2025-08-20 02:23:57 (took 0.10s)
+2025-08-21 13:55:34,835 - src.soft.scraper.scraper_discovery - INFO - ScraperDiscovery initialized with path: C:\smartlinks-autopilot\external_scrapers
+2025-08-21 13:55:34,837 - src.soft.scraper.scraper_runner - INFO - ScraperRunner initialized with path: C:\smartlinks-autopilot\external_scrapers

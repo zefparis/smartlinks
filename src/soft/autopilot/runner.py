@@ -6,7 +6,7 @@ import uuid
 from datetime import datetime, timedelta
 from typing import Dict, Any, Optional, List
 from sqlalchemy.orm import Session
-from sqlalchemy import create_engine, sessionmaker
+from sqlalchemy.orm import sessionmaker
 
 from .models import AlgorithmSettings, AIPolicy, AuditSettings, AuthorityLevel, AlgorithmRun
 from .schemas import ALGORITHM_SETTINGS_MAP

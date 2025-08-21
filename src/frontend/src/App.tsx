@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ServiceStatusProvider } from './contexts/ServiceStatusContext';
 import AppLayout from './components/layout/AppLayout';
 import Dashboard from './pages/Dashboard';
 import Analytics from './pages/Analytics';
@@ -23,6 +24,7 @@ import {
   UserHistoryPage,
   CheckoutPage
 } from './pages/Finance';
+import { ScraperPage } from './pages/ScraperPage';
 
 // Create QueryClient instance
 const queryClient = new QueryClient({
@@ -46,30 +48,33 @@ export default function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AppLayout isLoading={isLoading}>
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/analytics" element={<Analytics />} />
-          <Route path="/clicks" element={<Clicks />} />
-          <Route path="/history" element={<History />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/assistant" element={<AssistantPage />} />
-          <Route path="/ia/algorithms" element={<IAAlgorithmsPage />} />
-          <Route path="/ia/model" element={<IAModelPage />} />
-          <Route path="/ia/analysis" element={<IAAnalysisPage />} />
-          <Route path="/ia/status" element={<IAStatusPage />} />
-          <Route path="/dashboard/finance" element={<FinanceLayout />}>
-            <Route index element={<FinanceDashboardPage />} />
-            <Route path="payments" element={<PaymentsPage />} />
-            <Route path="payouts" element={<PayoutsPage />} />
-            <Route path="reconciliation" element={<ReconciliationPage />} />
-            <Route path="fees" element={<FeesPage />} />
-            <Route path="user-history" element={<UserHistoryPage />} />
-            <Route path="checkout" element={<CheckoutPage />} />
-          </Route>
-        </Routes>
-      </AppLayout>
+      <ServiceStatusProvider>
+        <AppLayout isLoading={isLoading}>
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/analytics" element={<Analytics />} />
+            <Route path="/clicks" element={<Clicks />} />
+            <Route path="/history" element={<History />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/assistant" element={<AssistantPage />} />
+            <Route path="/ia/algorithms" element={<IAAlgorithmsPage />} />
+            <Route path="/ia/model" element={<IAModelPage />} />
+            <Route path="/ia/analysis" element={<IAAnalysisPage />} />
+            <Route path="/ia/status" element={<IAStatusPage />} />
+            <Route path="/tools/scraper" element={<ScraperPage />} />
+            <Route path="/dashboard/finance" element={<FinanceLayout />}>
+              <Route index element={<FinanceDashboardPage />} />
+              <Route path="payments" element={<PaymentsPage />} />
+              <Route path="payouts" element={<PayoutsPage />} />
+              <Route path="reconciliation" element={<ReconciliationPage />} />
+              <Route path="fees" element={<FeesPage />} />
+              <Route path="user-history" element={<UserHistoryPage />} />
+              <Route path="checkout" element={<CheckoutPage />} />
+            </Route>
+          </Routes>
+        </AppLayout>
+      </ServiceStatusProvider>
     </QueryClientProvider>
   );
 }

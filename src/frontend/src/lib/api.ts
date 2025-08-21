@@ -139,7 +139,7 @@ interface ApiClient {
   getStats: () => Promise<StatsResponse>;
   getRecentClicks: (limit?: number, days?: number, device?: string, country?: string) => Promise<RecentClick[]>;
   getClickHistory: (days?: number, segmentId?: string, device?: string, country?: string) => Promise<ClickHistory[]>;
-  getDeviceStats: (segmentId?: string, timeRange?: string) => Promise<DeviceStats[]>;
+  getDeviceStats: (days?: number, limit?: number) => Promise<DeviceStats[]>;
   getCountryStats: (days?: number, limit?: number) => Promise<CountryStats[]>;
   seedDatabase: () => Promise<any>;
   updatePayouts: () => Promise<any>;
@@ -160,6 +160,24 @@ interface ApiClient {
   askDiscovery: (days?: number) => Promise<DiscoveryResponse>;
   iaStatus: () => Promise<any>;
   iaAsk: (question: string, context?: any) => Promise<any>;
+  // Scraper
+  scrapeOffers: (network: string, pages: number) => Promise<{ success: boolean; offers: any[]; count: number; message: string }>;
+  scraperHealth: () => Promise<{ ok: boolean; dependencies: Record<string, boolean>; message: string }>;
+  importOffer: (offer: any) => Promise<{ success: boolean; message: string; offer: any }>;
+  // Discovery Scraper
+  getDiscoveryStatus: () => Promise<any>;
+  startDiscovery: () => Promise<any>;
+  getDiscoveryFindings: () => Promise<any>;
+  importDiscoveredOffer: (offerId: number) => Promise<any>;
+  // Discovery Scheduler
+  getDiscoverySchedulerStatus: () => Promise<any>;
+  startDiscoveryScheduler: () => Promise<any>;
+  stopDiscoveryScheduler: () => Promise<any>;
+  runDiscoveryNow: () => Promise<any>;
+  updateDiscoverySchedulerConfig: (config: any) => Promise<any>;
+  // Dynamic Scrapers
+  listScrapers: () => Promise<{ scrapers: any[]; count: number }>;
+  runScraper: (repo: string, params?: any, timeout?: number) => Promise<{ success: boolean; repo: string; offers: any[]; count: number; message: string; logs?: string[]; execution_time?: number }>;
 }
 
 const apiClient: ApiClient = {
@@ -314,7 +332,31 @@ const apiClient: ApiClient = {
   // IA Supervisor - Unified API
   iaStatus: () => unwrapResponse(api.get('/api/ia/status')),
   iaAsk: (question: string, context?: any) => 
-    unwrapResponse(api.post('/api/ia/ask', { question, context }))
+    unwrapResponse(api.post('/api/ia/ask', { question, context })),
+
+  // Scraper
+  scrapeOffers: (network: string, pages: number) =>
+    unwrapResponse(api.post('/api/scraper/offers', { network, pages })),
+  scraperHealth: () => unwrapResponse(api.get('/api/scraper/health')),
+  importOffer: (offer: any) => unwrapResponse(api.post('/api/scraper/import', { offer })),
+
+  // Discovery Scraper methods
+  getDiscoveryStatus: () => unwrapResponse(api.get('/api/scraper/discovery/status')),
+  startDiscovery: () => unwrapResponse(api.post('/api/scraper/discovery/start')),
+  getDiscoveryFindings: () => unwrapResponse(api.get('/api/scraper/discovery/findings')),
+  importDiscoveredOffer: (offerId: number) => unwrapResponse(api.post(`/api/scraper/discovery/import-offer?offer_id=${offerId}`)),
+
+  // Discovery Scheduler endpoints
+  getDiscoverySchedulerStatus: () => unwrapResponse(api.get('/api/scraper/discovery/scheduler/status')),
+  startDiscoveryScheduler: () => unwrapResponse(api.post('/api/scraper/discovery/scheduler/start')),
+  stopDiscoveryScheduler: () => unwrapResponse(api.post('/api/scraper/discovery/scheduler/stop')),
+  runDiscoveryNow: () => unwrapResponse(api.post('/api/scraper/discovery/scheduler/run-now')),
+  updateDiscoverySchedulerConfig: (config: any) => unwrapResponse(api.post('/api/scraper/discovery/scheduler/config', config)),
+
+  // Dynamic Scrapers
+  listScrapers: () => unwrapResponse(api.get('/api/scraper/list')),
+  runScraper: (repo: string, params: any = {}, timeout: number = 300) =>
+    unwrapResponse(api.post('/api/scraper/run', { repo, params, timeout })),
 };
 
 export default apiClient;

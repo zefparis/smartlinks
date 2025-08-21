@@ -40,22 +40,26 @@ export function ServiceStatusProvider({ children }: { children: ReactNode }) {
     try {
       const healthRes = await adminApi.getHealth();
       
-      setStatus({
+      // Preserve existing probes status if it's already running
+      setStatus(prev => ({
         router: healthRes?.router ?? false,
         autopilot: healthRes?.autopilot ?? false,
-        probes: false, // Not available in health check
-      });
+        probes: prev.probes, // Keep current probes status
+      }));
     } catch (error) {
       console.error('Failed to refresh service status:', error);
-      toast.error('Failed to refresh service status');
+      // Don't show toast error on every refresh failure to avoid spam
     }
   };
 
   const startService = async (service: ServiceName) => {
     try {
       await adminApi.startService(service);
-      await refreshStatus();
+      // Update status immediately for better UX
+      setStatus(prev => ({ ...prev, [service]: true }));
       toast.success(`${service} started successfully`);
+      // Refresh in background
+      setTimeout(refreshStatus, 1000);
     } catch (error) {
       console.error(`Failed to start ${service}:`, error);
       toast.error(`Failed to start ${service}`);
@@ -65,8 +69,11 @@ export function ServiceStatusProvider({ children }: { children: ReactNode }) {
   const stopService = async (service: ServiceName) => {
     try {
       await adminApi.stopService(service);
-      await refreshStatus();
+      // Update status immediately for better UX
+      setStatus(prev => ({ ...prev, [service]: false }));
       toast.success(`${service} stopped successfully`);
+      // Refresh in background
+      setTimeout(refreshStatus, 1000);
     } catch (error) {
       console.error(`Failed to stop ${service}:`, error);
       toast.error(`Failed to stop ${service}`);

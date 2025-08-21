@@ -12,17 +12,35 @@ from enum import Enum
 import uuid
 import hashlib
 import secrets
-import jwt
 from functools import wraps
 
 from sqlalchemy.orm import Session
 from sqlalchemy import Column, String, DateTime, Boolean, Text, Integer, JSON, Float
 from sqlalchemy.ext.declarative import declarative_base
 
-from ..models.base import Base
+from ...backend.database import Base
 from ..models.notifications import NotificationService
 
 logger = logging.getLogger(__name__)
+
+# Lazy import for PyJWT to avoid module-level import failures during uvicorn reload on Windows
+_jwt = None  # cached module
+
+def _get_jwt():
+    """Return the PyJWT module, importing and caching it on first use.
+    Raises a clear error if PyJWT is not installed.
+    """
+    global _jwt
+    if _jwt is not None:
+        return _jwt
+    try:
+        import jwt as _mod  # type: ignore
+    except Exception as e:  # pragma: no cover - clear error path
+        raise ImportError(
+            "PyJWT is required but not installed. Install with 'pip install PyJWT==2.8.0'."
+        ) from e
+    _jwt = _mod
+    return _jwt
 
 class UserRole(Enum):
     ADMIN = "admin"
@@ -148,7 +166,7 @@ class SecurityEvent(Base):
     
     # Détails
     description = Column(Text, nullable=False)
-    metadata = Column(JSON, default={})
+    details = Column(JSON, default={})
     
     # Actions
     action_taken = Column(String, nullable=True)  # blocked, flagged, ignored
@@ -368,7 +386,8 @@ class SecurityService:
         """Valide une session utilisateur."""
         try:
             # Décoder le JWT
-            payload = jwt.decode(token, self.jwt_secret, algorithms=["HS256"])
+            jwt_mod = _get_jwt()
+            payload = jwt_mod.decode(token, self.jwt_secret, algorithms=["HS256"])
             user_id = payload.get("user_id")
             session_id = payload.get("session_id")
             
@@ -407,7 +426,15 @@ class SecurityService:
                 "session_id": session.id
             }
             
-        except jwt.InvalidTokenError:
+        except Exception as e:
+            # If PyJWT is present, map its InvalidTokenError to None; else propagate clear install error
+            try:
+                jwt_mod = _get_jwt()
+                if isinstance(e, getattr(jwt_mod, "InvalidTokenError", Exception)):
+                    return None
+            except ImportError:
+                raise
+            return None
             return None
     
     def check_permission(self, user_permissions: List[str], required_permission: Permission) -> bool:
@@ -506,7 +533,8 @@ class SecurityService:
             "exp": datetime.utcnow() + timedelta(hours=self.session_duration)
         }
         
-        return jwt.encode(payload, self.jwt_secret, algorithm="HS256")
+        jwt_mod = _get_jwt()
+        return jwt_mod.encode(payload, self.jwt_secret, algorithm="HS256")
     
     def _verify_2fa_code(self, secret: str, code: str) -> bool:
         """Vérifie un code 2FA TOTP."""
@@ -539,7 +567,7 @@ class SecurityService:
             ip_address=ip_address,
             user_agent=user_agent,
             endpoint=endpoint,
-            metadata=metadata or {}
+            details=metadata or {}
         )
         
         self.db.add(event)
@@ -665,7 +693,8 @@ class SecurityService:
                     "description": event.description,
                     "user_id": event.user_id,
                     "ip_address": event.ip_address,
-                    "created_at": event.created_at.isoformat()
+                    "created_at": event.created_at.isoformat(),
+                    "metadata": event.details
                 }
                 for event in recent_events
             ],

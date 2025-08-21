@@ -9,6 +9,7 @@ import {
   Cog6ToothIcon,
   XMarkIcon,
   BanknotesIcon,
+  DocumentMagnifyingGlassIcon,
 } from '@heroicons/react/24/outline';
 
 const navigation = [
@@ -17,6 +18,7 @@ const navigation = [
   { name: 'Finance', href: '/dashboard/finance', icon: BanknotesIcon },
   { name: 'Clicks', href: '/clicks', icon: CursorArrowRaysIcon },
   { name: 'History', href: '/history', icon: ClockIcon },
+  { name: 'Scraper', href: '/tools/scraper', icon: DocumentMagnifyingGlassIcon },
   { name: 'Settings', href: '/settings', icon: Cog6ToothIcon },
 ];
 
